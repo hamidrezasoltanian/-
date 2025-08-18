@@ -1,4 +1,3 @@
-
 import React, { useState, useContext, useMemo, useEffect, useRef } from 'react';
 import { AppContext } from '../../contexts/AppContext.ts';
 import { Proforma, ProformaItem, Product } from '../../types.ts';
@@ -224,7 +223,7 @@ const ProformaEditor: React.FC<ProformaEditorProps> = ({ initialProforma, onSave
 const ProformaView: React.FC = () => {
     const context = useContext(AppContext);
     if (!context) throw new Error("AppContext not found");
-    const { proformas, setProformas, showNotification } = context;
+    const { proformas, setProformas, showNotification, logActivity } = context;
 
     const [viewMode, setViewMode] = useState<'list' | 'create'>('list');
     const [selectedProforma, setSelectedProforma] = useState<Proforma | null>(null);
@@ -247,15 +246,20 @@ const ProformaView: React.FC = () => {
 
     const handleDelete = () => {
         if (!deleteConfirmId) return;
+        const proformaToDelete = proformas.find(p => p.id === deleteConfirmId);
         setProformas(prev => prev.filter(p => p.id !== deleteConfirmId));
         setDeleteConfirmId(null);
         showNotification('پیش‌فاکتور با موفقیت حذف شد');
+        if (proformaToDelete) {
+            logActivity('DELETE', 'Proforma', `پیش‌فاکتور برای شرکت '${proformaToDelete.companyName}' را حذف کرد.`, deleteConfirmId);
+        }
     };
 
     const handleSave = (data: Omit<Proforma, 'id' | 'date'> & { id?: string }) => {
         if (data.id) { // Update
             setProformas(prev => prev.map(p => p.id === data.id ? { ...p, companyName: data.companyName, items: data.items, total: data.total } : p));
             showNotification('پیش‌فاکتور با موفقیت به‌روزرسانی شد');
+            logActivity('UPDATE', 'Proforma', `پیش‌فاکتور برای شرکت '${data.companyName}' را به‌روزرسانی کرد.`, data.id);
         } else { // Create
             const newProforma: Proforma = {
                 ...data,
@@ -264,6 +268,7 @@ const ProformaView: React.FC = () => {
             };
             setProformas(prev => [newProforma, ...prev]);
             showNotification("پیش‌فاکتور با موفقیت ذخیره شد");
+            logActivity('CREATE', 'Proforma', `پیش‌فاکتور برای شرکت '${data.companyName}' را ایجاد کرد.`, newProforma.id);
         }
         setViewMode('list');
         setSelectedProforma(null);

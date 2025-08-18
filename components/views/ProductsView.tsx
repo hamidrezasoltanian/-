@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useContext, useRef } from 'react';
 import { AppContext, AppContextType } from '../../contexts/AppContext.ts';
 import { Product } from '../../types.ts';
@@ -95,12 +94,14 @@ const ProductForm: React.FC<{ product: Partial<Product>; onSave: (product: Produ
 const ProductsView: React.FC = () => {
     const context = useContext(AppContext);
     if (!context) throw new Error("AppContext not found");
-    const { products, setProducts, showNotification } = context;
+    const { products, setProducts, showNotification, currentUser, logActivity } = context;
 
     const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const canEdit = currentUser?.role === 'admin' || currentUser?.role === 'procurement';
 
     const filteredProducts = useMemo(() => {
         if (!searchTerm) return products;
@@ -117,21 +118,37 @@ const ProductsView: React.FC = () => {
     const handleEdit = (product: Product) => setEditingProduct(product);
 
     const handleSave = (productToSave: Product) => {
-        if (productToSave.id && products.some(p => p.id === productToSave.id)) {
+        if (!canEdit) {
+            showNotification("شما اجازه ویرایش کالاها را ندارید", "error");
+            return;
+        }
+        const isUpdating = products.some(p => p.id === productToSave.id);
+
+        if (isUpdating) {
             setProducts(prev => prev.map(p => p.id === productToSave.id ? productToSave : p));
             showNotification("کالا با موفقیت به‌روزرسانی شد");
+            logActivity('UPDATE', 'Product', `کالای '${productToSave.name}' را به‌روزرسانی کرد.`, productToSave.id);
         } else {
-            setProducts(prev => [...prev, { ...productToSave, id: generateId('prod') }]);
+            setProducts(prev => [...prev, productToSave]);
             showNotification("کالا با موفقیت اضافه شد");
+            logActivity('CREATE', 'Product', `کالای '${productToSave.name}' را ایجاد کرد.`, productToSave.id);
         }
         setEditingProduct(null);
     };
 
     const handleDelete = () => {
         if (!deleteConfirmId) return;
+        if (!canEdit) {
+            showNotification("شما اجازه حذف کالاها را ندارید", "error");
+            return;
+        }
+        const productToDelete = products.find(p => p.id === deleteConfirmId);
         setProducts(prev => prev.filter(p => p.id !== deleteConfirmId));
         setDeleteConfirmId(null);
         showNotification("کالا با موفقیت حذف شد");
+        if (productToDelete) {
+            logActivity('DELETE', 'Product', `کالای '${productToDelete.name}' (کد: ${productToDelete.code}) را حذف کرد.`, deleteConfirmId);
+        }
     };
 
     const handleDownloadSample = () => {
@@ -195,9 +212,10 @@ const ProductsView: React.FC = () => {
                     });
                 });
                 
-                if (!hasError) {
+                if (!hasError && newProducts.length > 0) {
                     setProducts(prev => [...prev, ...newProducts]);
                     showNotification(`${newProducts.length} کالا با موفقیت اضافه شد.`);
+                    logActivity('IMPORT', 'Product', `تعداد ${newProducts.length} کالا را از طریق فایل اکسل وارد کرد.`);
                 }
             } catch (err) {
                  showNotification("خطا در پردازش فایل.", "error");
@@ -212,12 +230,14 @@ const ProductsView: React.FC = () => {
         <div className="p-4 md:p-8 max-w-7xl mx-auto h-full flex flex-col">
             <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-800">مدیریت کالاها</h2>
-                 <div className="flex gap-2">
-                    <button onClick={() => fileInputRef.current?.click()} className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">ورود از اکسل</button>
-                    <button onClick={handleDownloadSample} className="text-blue-600 hover:text-blue-800 font-semibold transition-colors text-sm py-2 px-2">دانلود نمونه</button>
-                    <button onClick={handleAdd} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg shadow-md hover:shadow-lg transition-all text-sm">+ افزودن کالا</button>
-                    <input type="file" ref={fileInputRef} onChange={handleFileImport} className="hidden" accept=".csv" />
-                </div>
+                 {canEdit && (
+                    <div className="flex gap-2">
+                        <button onClick={() => fileInputRef.current?.click()} className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">ورود از اکسل</button>
+                        <button onClick={handleDownloadSample} className="text-blue-600 hover:text-blue-800 font-semibold transition-colors text-sm py-2 px-2">دانلود نمونه</button>
+                        <button onClick={handleAdd} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg shadow-md hover:shadow-lg transition-all text-sm">+ افزودن کالا</button>
+                        <input type="file" ref={fileInputRef} onChange={handleFileImport} className="hidden" accept=".csv" />
+                    </div>
+                 )}
             </div>
             <input type="text" placeholder="جستجوی کالا (نام، کد، IRC، تولیدکننده...)" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full p-3 border border-gray-300 rounded-lg mb-6 focus:ring-2 focus:ring-blue-500" />
             
@@ -225,7 +245,7 @@ const ProductsView: React.FC = () => {
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
-                            {['نام کالا', 'کد کالا', 'تولیدکننده', 'قیمت ارزی', 'عملیات'].map(h => 
+                            {['نام کالا', 'کد کالا', 'تولیدکننده', 'قیمت ارزی', canEdit ? 'عملیات' : ''].map(h => 
                                 <th key={h} className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{h}</th>
                             )}
                         </tr>
@@ -237,10 +257,12 @@ const ProductsView: React.FC = () => {
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{p.code}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{p.manufacturer}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatNumber(p.currencyPrice)} {p.currencyType}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <button onClick={() => handleEdit(p)} className="text-indigo-600 hover:text-indigo-900 ml-4 transition-colors">ویرایش</button>
-                                    <button onClick={() => setDeleteConfirmId(p.id)} className="text-red-600 hover:text-red-900 transition-colors">حذف</button>
-                                </td>
+                                {canEdit && (
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button onClick={() => handleEdit(p)} className="text-indigo-600 hover:text-indigo-900 ml-4 transition-colors">ویرایش</button>
+                                        <button onClick={() => setDeleteConfirmId(p.id)} className="text-red-600 hover:text-red-900 transition-colors">حذف</button>
+                                    </td>
+                                )}
                             </tr>
                         ))}
                     </tbody>

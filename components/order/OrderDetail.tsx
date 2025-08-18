@@ -1,4 +1,3 @@
-
 import React, { useState, useContext, useEffect } from 'react';
 import { AppContext } from '../../contexts/AppContext.ts';
 import { Order } from '../../types.ts';
@@ -9,12 +8,13 @@ interface OrderDetailProps {
     order: Order;
     onUpdate: (order: Order) => void;
     onDelete: () => void;
+    readOnly?: boolean;
 }
 
-const OrderDetail: React.FC<OrderDetailProps> = ({ order, onUpdate, onDelete }) => {
+const OrderDetail: React.FC<OrderDetailProps> = ({ order, onUpdate, onDelete, readOnly = false }) => {
     const context = useContext(AppContext);
     if (!context) throw new Error("AppContext not found");
-    const { workflows, showNotification } = context;
+    const { workflows, showNotification, logActivity } = context;
 
     const [activeStepIndex, setActiveStepIndex] = useState(0);
     const [orderTitle, setOrderTitle] = useState(order.title || '');
@@ -34,12 +34,18 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onUpdate, onDelete }) 
     const handleStepDataChange = (stepId: string, data: any) => {
         const updatedStepsData = { ...(order.steps_data || {}), [stepId]: data };
         onUpdate({ ...order, steps_data: updatedStepsData });
+        
+        const step = workflow.steps.find(s => s.id === stepId);
+        if (step) {
+            logActivity('UPDATE', 'Order', `مرحله '${step.title}' از سفارش '${order.title}' را به‌روزرسانی کرد.`, order.id);
+        }
     };
 
     const handleSaveTitle = () => {
         if (order.title !== orderTitle && orderTitle.trim()) {
             onUpdate({ ...order, title: orderTitle.trim() });
             showNotification("عنوان سفارش به‌روزرسانی شد");
+            logActivity('UPDATE', 'Order', `عنوان سفارش را از '${order.title}' به '${orderTitle.trim()}' تغییر داد.`, order.id);
         }
     };
 
@@ -59,9 +65,10 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onUpdate, onDelete }) 
                     onChange={e => setOrderTitle(e.target.value)} 
                     onBlur={handleSaveTitle}
                     onKeyDown={(e) => e.key === 'Enter' && handleSaveTitle()}
-                    className="text-2xl font-bold flex-grow p-2 rounded-md bg-transparent hover:bg-gray-100 focus:bg-white focus:ring-2 focus:ring-blue-400 transition-all"
+                    disabled={readOnly}
+                    className="text-2xl font-bold flex-grow p-2 rounded-md bg-transparent hover:bg-gray-100 focus:bg-white focus:ring-2 focus:ring-blue-400 transition-all disabled:bg-transparent disabled:cursor-not-allowed"
                 />
-                <button onClick={() => setShowDeleteConfirm(true)} className="bg-red-100 hover:bg-red-200 text-red-700 font-bold py-2 px-4 rounded-lg transition-colors">حذف سفارش</button>
+                {!readOnly && <button onClick={() => setShowDeleteConfirm(true)} className="bg-red-100 hover:bg-red-200 text-red-700 font-bold py-2 px-4 rounded-lg transition-colors">حذف سفارش</button>}
             </div>
             <div className="bg-white rounded-xl shadow-lg">
                 <nav className="border-b border-gray-200 flex overflow-x-auto">
@@ -82,6 +89,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onUpdate, onDelete }) 
                         order={order} 
                         workflowStep={activeStep}
                         onStepDataChange={handleStepDataChange} 
+                        readOnly={readOnly}
                     />
                 </div>
             </div>

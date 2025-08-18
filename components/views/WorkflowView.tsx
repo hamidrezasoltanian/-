@@ -1,4 +1,3 @@
-
 import React, { useState, useContext, useMemo } from 'react';
 import { AppContext } from '../../contexts/AppContext.ts';
 import { Order, Workflow } from '../../types.ts';
@@ -10,24 +9,31 @@ import Modal from '../shared/Modal.tsx';
 const WorkflowView: React.FC = () => {
     const context = useContext(AppContext);
     if (!context) throw new Error("AppContext not found");
-    const { orders, setOrders, workflows, showNotification } = context;
+    const { orders, setOrders, workflows, showNotification, selectedOrderId, setSelectedOrderId, currentUser, logActivity } = context;
     
-    const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
     const [showModal, setShowModal] = useState(false);
+    
+    const canEdit = currentUser?.role === 'admin' || currentUser?.role === 'sales';
 
     const handleAddOrder = (workflowId: string) => {
+        if (!canEdit) {
+            showNotification("شما اجازه ایجاد سفارش جدید را ندارید", "error");
+            return;
+        }
         const workflow = workflows.find(wf => wf.id === workflowId);
+        const orderTitle = `سفارش جدید - ${workflow?.name || ''} - ${toJalali(new Date().toISOString())}`;
         const newOrder: Order = {
             id: generateId('order'),
             workflowId,
             created_at: new Date().toISOString(),
-            title: `سفارش جدید - ${workflow?.name || ''} - ${toJalali(new Date().toISOString())}`,
+            title: orderTitle,
             steps_data: {}
         };
         setOrders(prev => [newOrder, ...prev]);
         setSelectedOrderId(newOrder.id);
         setShowModal(false);
         showNotification("سفارش جدید ایجاد شد");
+        logActivity('CREATE', 'Order', `سفارش '${orderTitle}' را ایجاد کرد.`, newOrder.id);
     };
     
     const handleUpdateOrder = (updatedOrder: Order) => {
@@ -35,11 +41,19 @@ const WorkflowView: React.FC = () => {
     };
 
     const handleDeleteOrder = (orderId: string) => {
+        if (!canEdit) {
+            showNotification("شما اجازه حذف سفارش را ندارید", "error");
+            return;
+        }
+        const orderToDelete = orders.find(o => o.id === orderId);
         setOrders(prev => prev.filter(o => o.id !== orderId));
         if (selectedOrderId === orderId) {
             setSelectedOrderId(null);
         }
         showNotification("سفارش با موفقیت حذف شد");
+        if(orderToDelete){
+            logActivity('DELETE', 'Order', `سفارش '${orderToDelete.title}' را حذف کرد.`, orderId);
+        }
     };
       
     const selectedOrder = useMemo(() => orders.find(o => o.id === selectedOrderId), [orders, selectedOrderId]);
@@ -48,7 +62,7 @@ const WorkflowView: React.FC = () => {
     return (
         <div className="flex h-full bg-white">
             <aside className="w-1/3 xl:w-1/4 bg-gray-50 border-l border-gray-200 p-4 flex flex-col">
-                <button onClick={() => setShowModal(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg mb-4 shadow-md hover:shadow-lg transition-all flex-shrink-0">+ ایجاد سفارش جدید</button>
+                {canEdit && <button onClick={() => setShowModal(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg mb-4 shadow-md hover:shadow-lg transition-all flex-shrink-0">+ ایجاد سفارش جدید</button>}
                 <div className="flex-grow overflow-y-auto space-y-2 pr-1">
                     {sortedOrders.map(order => (
                         <div 
@@ -68,7 +82,8 @@ const WorkflowView: React.FC = () => {
                         key={selectedOrder.id} 
                         order={selectedOrder} 
                         onUpdate={handleUpdateOrder} 
-                        onDelete={() => handleDeleteOrder(selectedOrder.id)} 
+                        onDelete={() => handleDeleteOrder(selectedOrder.id)}
+                        readOnly={!canEdit}
                     />
                 ) : (
                     <div className="h-full flex flex-col items-center justify-center text-center text-gray-500">

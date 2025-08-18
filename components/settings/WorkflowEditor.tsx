@@ -1,4 +1,3 @@
-
 import React, { useState, useContext } from 'react';
 import { AppContext } from '../../contexts/AppContext.ts';
 import { Workflow, Step, Field } from '../../types.ts';
@@ -13,7 +12,7 @@ interface WorkflowEditorProps {
 const WorkflowEditor: React.FC<WorkflowEditorProps> = ({ workflow, onBack }) => {
     const context = useContext(AppContext);
     if (!context) throw new Error("AppContext not found");
-    const { setWorkflows, showNotification } = context;
+    const { setWorkflows, showNotification, logActivity } = context;
 
     const [localWorkflow, setLocalWorkflow] = useState<Workflow>(workflow);
     const [draggedField, setDraggedField] = useState<{ stepId: string, fieldId: string } | null>(null);
@@ -32,6 +31,7 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({ workflow, onBack }) => 
     const handleSave = () => {
         setWorkflows(prev => prev.map(wf => wf.id === localWorkflow.id ? localWorkflow : wf));
         showNotification("تغییرات فرآیند ذخیره شد");
+        logActivity('UPDATE', 'Workflow', `فرآیند '${localWorkflow.name}' را به‌روزرسانی کرد.`, localWorkflow.id);
         onBack();
     };
     

@@ -9,9 +9,10 @@ interface ProductSelectorFieldProps {
     value: OrderProductItem[];
     onChange: (e: { target: { name: string; value: OrderProductItem[] } }) => void;
     error?: boolean;
+    readOnly?: boolean;
 }
 
-const ProductSelectorField: React.FC<ProductSelectorFieldProps> = ({ field, value, onChange, error }) => {
+const ProductSelectorField: React.FC<ProductSelectorFieldProps> = ({ field, value, onChange, error, readOnly = false }) => {
     const { products } = useContext(AppContext)!;
     const selectedItems = value || [];
 
@@ -45,24 +46,26 @@ const ProductSelectorField: React.FC<ProductSelectorFieldProps> = ({ field, valu
 
 
     return (
-        <div className={`w-full border rounded-lg bg-white ${error ? 'border-red-500' : 'border-gray-200'}`}>
-            <div className="p-3 border-b">
-                <h4 className="font-semibold text-gray-700">انتخاب کالاها</h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3 max-h-48 overflow-y-auto pr-2">
-                    {products.map(product => (
-                        <div key={product.id} className="flex items-center">
-                            <input
-                                type="checkbox"
-                                id={`${field.id}-${product.id}`}
-                                checked={selectedItems.some(item => item.productId === product.id)}
-                                onChange={() => handleProductToggle(product.id)}
-                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            />
-                            <label htmlFor={`${field.id}-${product.id}`} className="mr-2 text-sm text-gray-800 cursor-pointer">{product.name}</label>
-                        </div>
-                    ))}
+        <div className={`w-full border rounded-lg bg-white ${error ? 'border-red-500' : 'border-gray-200'} ${readOnly ? 'bg-gray-100' : ''}`}>
+            {!readOnly && (
+                <div className="p-3 border-b">
+                    <h4 className="font-semibold text-gray-700">انتخاب کالاها</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3 max-h-48 overflow-y-auto pr-2">
+                        {products.map(product => (
+                            <div key={product.id} className="flex items-center">
+                                <input
+                                    type="checkbox"
+                                    id={`${field.id}-${product.id}`}
+                                    checked={selectedItems.some(item => item.productId === product.id)}
+                                    onChange={() => handleProductToggle(product.id)}
+                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <label htmlFor={`${field.id}-${product.id}`} className="mr-2 text-sm text-gray-800 cursor-pointer">{product.name}</label>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
             <div className="p-3">
                 <h4 className="font-semibold mb-3 text-gray-700">کالاهای انتخاب شده</h4>
                 {selectedItems.length === 0 ? <p className="text-sm text-gray-500">کالایی انتخاب نشده است.</p> : (
@@ -78,7 +81,8 @@ const ProductSelectorField: React.FC<ProductSelectorFieldProps> = ({ field, valu
                                         type="number"
                                         value={item.quantity}
                                         onChange={(e) => handleQuantityChange(item.productId, e.target.value)}
-                                        className="col-span-3 w-full p-1 border rounded-md"
+                                        disabled={readOnly}
+                                        className="col-span-3 w-full p-1 border rounded-md disabled:bg-gray-200 disabled:cursor-not-allowed"
                                         min="1"
                                     />
                                     <span className="col-span-3 text-gray-600">{formatNumber(product.currencyPrice)} {product.currencyType}</span>

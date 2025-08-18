@@ -1,4 +1,3 @@
-
 export type FieldType = 'text' | 'number' | 'date' | 'textarea' | 'checkbox' | 'select' | 'product';
 export type FieldWidth = 'half' | 'full';
 
@@ -79,4 +78,27 @@ export interface Proforma {
   date: string; // ISO date string
   items: ProformaItem[];
   total: number;
+}
+
+export type UserRole = 'admin' | 'sales' | 'procurement';
+
+export interface User {
+    id: string;
+    username: string;
+    password?: string; // Optional for security when sending to client
+    role: UserRole;
+}
+
+export type ActivityLogAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'IMPORT' | 'LOGIN' | 'LOGOUT';
+export type EntityType = 'Order' | 'Product' | 'Proforma' | 'User' | 'Workflow' | 'System';
+
+export interface ActivityLog {
+    id: string;
+    timestamp: string; // ISO date string
+    userId: string;
+    username: string;
+    action: ActivityLogAction;
+    entityType: EntityType;
+    entityId?: string; 
+    details: string;
 }
