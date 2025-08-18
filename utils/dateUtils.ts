@@ -18,6 +18,11 @@ function toEnglishDigits(str: string): string {
 
 export const toJalali = (dateString: string | null | undefined): string => {
   if (!dateString) return '';
+  // Add a guard to prevent crashes if executed in an environment where the script hasn't loaded (e.g., SSR)
+  if (typeof persianDate === 'undefined') {
+    console.warn("persian-date library not loaded. Cannot convert to Jalali.");
+    return dateString; // Fallback to original string to avoid crashing
+  }
   try {
     return new persianDate(new Date(dateString)).format('YYYY/MM/DD');
   } catch (e) {
@@ -28,6 +33,11 @@ export const toJalali = (dateString: string | null | undefined): string => {
 
 export const fromJalali = (jalaliString: string | null | undefined): string => {
   if (!jalaliString) return '';
+  // Add a guard for safety
+  if (typeof persianDate === 'undefined') {
+    console.warn("persian-date library not loaded. Cannot convert from Jalali.");
+    return ''; // Cannot proceed without the library
+  }
   try {
     // 1. Convert any Farsi/Arabic digits to English digits and trim whitespace
     const englishDateString = toEnglishDigits(String(jalaliString).trim());

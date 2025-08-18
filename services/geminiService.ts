@@ -7,10 +7,20 @@ const API_KEY = process.env.API_KEY;
 let ai: GoogleGenAI | null = null;
 
 function getAiInstance(): GoogleGenAI | null {
+    // Add a guard to prevent crashes if executed in a non-browser environment (e.g., SSR)
+    if (typeof window === 'undefined') {
+        return null;
+    }
     if (ai) return ai;
+
     if (API_KEY) {
-        ai = new GoogleGenAI({ apiKey: API_KEY });
-        return ai;
+        try {
+            ai = new GoogleGenAI({ apiKey: API_KEY });
+            return ai;
+        } catch (error) {
+            console.error("Error initializing GoogleGenAI:", error);
+            return null;
+        }
     }
     return null;
 }

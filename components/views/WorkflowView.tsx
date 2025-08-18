@@ -1,18 +1,58 @@
-import React, { useState, useContext, useMemo } from 'react';
+import React, { useState, useContext, useMemo, useEffect } from 'react';
 import { AppContext } from '../../contexts/AppContext.ts';
-import { Order, Workflow } from '../../types.ts';
+import { Order, Workflow, Step } from '../../types.ts';
 import { generateId } from '../../utils/idUtils.ts';
 import { toJalali } from '../../utils/dateUtils.ts';
 import OrderDetail from '../order/OrderDetail.tsx';
 import Modal from '../shared/Modal.tsx';
+
+// Kanban Column Component
+interface KanbanColumnProps {
+    step: Step;
+    orders: Order[];
+    onOrderSelect: (orderId: string) => void;
+}
+
+const KanbanColumn: React.FC<KanbanColumnProps> = ({ step, orders, onOrderSelect }) => (
+    <div className="flex-shrink-0 w-80 bg-gray-100 rounded-xl flex flex-col max-h-full">
+        <div className="p-4 border-b">
+            <h3 className="text-lg font-bold text-gray-800 flex justify-between items-center">
+                <span>{step.title}</span>
+                <span className="text-sm font-medium bg-gray-200 text-gray-600 rounded-full px-2 py-0.5">{orders.length}</span>
+            </h3>
+        </div>
+        <div className="p-3 overflow-y-auto flex-grow">
+            <div className="space-y-3">
+                {orders.map(order => (
+                    <div
+                        key={order.id}
+                        onClick={() => onOrderSelect(order.id)}
+                        className="bg-white p-4 rounded-lg shadow-sm cursor-pointer hover:shadow-md hover:border-blue-500 border-2 border-transparent transition-all"
+                    >
+                        <p className="font-semibold text-gray-900 break-words">{order.title}</p>
+                        <p className="text-sm text-gray-500 mt-1">{toJalali(order.created_at)}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </div>
+);
+
 
 const WorkflowView: React.FC = () => {
     const context = useContext(AppContext);
     if (!context) throw new Error("AppContext not found");
     const { orders, setOrders, workflows, showNotification, selectedOrderId, setSelectedOrderId, currentUser, logActivity } = context;
     
-    const [showModal, setShowModal] = useState(false);
-    
+    const [showNewOrderModal, setShowNewOrderModal] = useState(false);
+    const [activeWorkflowId, setActiveWorkflowId] = useState<string | null>(workflows[0]?.id || null);
+
+    useEffect(() => {
+        if (!activeWorkflowId && workflows.length > 0) {
+            setActiveWorkflowId(workflows[0].id);
+        }
+    }, [workflows, activeWorkflowId]);
+
     const canEdit = currentUser?.role === 'admin' || currentUser?.role === 'sales';
 
     const handleAddOrder = (workflowId: string) => {
@@ -31,7 +71,7 @@ const WorkflowView: React.FC = () => {
         };
         setOrders(prev => [newOrder, ...prev]);
         setSelectedOrderId(newOrder.id);
-        setShowModal(false);
+        setShowNewOrderModal(false);
         showNotification("سفارش جدید ایجاد شد");
         logActivity('CREATE', 'Order', `سفارش '${orderTitle}' را ایجاد کرد.`, newOrder.id);
     };
@@ -47,9 +87,7 @@ const WorkflowView: React.FC = () => {
         }
         const orderToDelete = orders.find(o => o.id === orderId);
         setOrders(prev => prev.filter(o => o.id !== orderId));
-        if (selectedOrderId === orderId) {
-            setSelectedOrderId(null);
-        }
+        setSelectedOrderId(null);
         showNotification("سفارش با موفقیت حذف شد");
         if(orderToDelete){
             logActivity('DELETE', 'Order', `سفارش '${orderToDelete.title}' را حذف کرد.`, orderId);
@@ -57,27 +95,79 @@ const WorkflowView: React.FC = () => {
     };
       
     const selectedOrder = useMemo(() => orders.find(o => o.id === selectedOrderId), [orders, selectedOrderId]);
-    const sortedOrders = useMemo(() => [...orders].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()), [orders]);
+
+    const kanbanData = useMemo(() => {
+        if (!activeWorkflowId) return [];
+        const workflow = workflows.find(wf => wf.id === activeWorkflowId);
+        if (!workflow) return [];
+
+        const columns: { step: Step; orders: Order[] }[] = workflow.steps.map(step => ({ step, orders: [] }));
+        
+        const workflowOrders = [...orders]
+            .filter(o => o.workflowId === activeWorkflowId)
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+        workflowOrders.forEach(order => {
+            let lastCompletedStepIndex = -1;
+            for (let i = workflow.steps.length - 1; i >= 0; i--) {
+                const step = workflow.steps[i];
+                if (order.steps_data?.[step.id]?.completed_at) {
+                    lastCompletedStepIndex = i;
+                    break;
+                }
+            }
+
+            let targetColumnIndex = lastCompletedStepIndex + 1;
+            if (targetColumnIndex >= columns.length) {
+                targetColumnIndex = columns.length - 1;
+            }
+            columns[targetColumnIndex].orders.push(order);
+        });
+
+        return columns;
+    }, [activeWorkflowId, orders, workflows]);
+
 
     return (
-        <div className="flex h-full bg-white">
-            <aside className="w-1/3 xl:w-1/4 bg-gray-50 border-l border-gray-200 p-4 flex flex-col">
-                {canEdit && <button onClick={() => setShowModal(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg mb-4 shadow-md hover:shadow-lg transition-all flex-shrink-0">+ ایجاد سفارش جدید</button>}
-                <div className="flex-grow overflow-y-auto space-y-2 pr-1">
-                    {sortedOrders.map(order => (
-                        <div 
-                            key={order.id} 
-                            onClick={() => setSelectedOrderId(order.id)} 
-                            className={`p-4 rounded-lg cursor-pointer border-2 transition-all duration-200 ${selectedOrderId === order.id ? 'border-blue-500 bg-blue-50 shadow-md' : 'border-transparent bg-white hover:bg-gray-100 hover:border-gray-300'}`}
-                        >
-                            <h3 className="font-semibold text-gray-800 break-words">{order.title}</h3>
-                            <p className="text-sm text-gray-500 mt-1">{toJalali(order.created_at)}</p>
-                        </div>
-                    ))}
+        <div className="flex flex-col h-full p-4 md:p-6 bg-gray-50">
+            <header className="flex-shrink-0 flex justify-between items-center mb-6 flex-wrap gap-4">
+                <div>
+                     <h2 className="text-2xl md:text-3xl font-bold text-gray-800">گردش کار کانبان</h2>
+                     <p className="text-gray-500 mt-1">وضعیت سفارشات خود را در یک نگاه مدیریت کنید.</p>
                 </div>
-            </aside>
-            <main className="w-2/3 xl:w-3/4 p-4 md:p-8 overflow-y-auto">
-                {selectedOrder ? (
+                <div className="flex items-center gap-4">
+                    <select
+                        value={activeWorkflowId || ''}
+                        onChange={(e) => setActiveWorkflowId(e.target.value)}
+                        className="p-3 border border-gray-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-blue-500 min-w-[200px]"
+                    >
+                        {workflows.map(wf => <option key={wf.id} value={wf.id}>{wf.name}</option>)}
+                    </select>
+                    {canEdit && <button onClick={() => setShowNewOrderModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-5 rounded-lg shadow-md hover:shadow-lg transition-all">+ سفارش جدید</button>}
+                </div>
+            </header>
+            
+            <main className="flex-grow overflow-x-auto pb-4">
+                <div className="flex gap-6 h-full">
+                    {kanbanData.length > 0 ? (
+                        kanbanData.map(({ step, orders }) => (
+                            <KanbanColumn
+                                key={step.id}
+                                step={step}
+                                orders={orders}
+                                onOrderSelect={setSelectedOrderId}
+                            />
+                        ))
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-500">
+                            <p>برای این فرآیند مرحله‌ای تعریف نشده یا فرآیندی انتخاب نشده است.</p>
+                        </div>
+                    )}
+                </div>
+            </main>
+            
+            <Modal show={!!selectedOrder} onClose={() => setSelectedOrderId(null)} maxWidth="max-w-4xl">
+                {selectedOrder && (
                     <OrderDetail 
                         key={selectedOrder.id} 
                         order={selectedOrder} 
@@ -85,17 +175,11 @@ const WorkflowView: React.FC = () => {
                         onDelete={() => handleDeleteOrder(selectedOrder.id)}
                         readOnly={!canEdit}
                     />
-                ) : (
-                    <div className="h-full flex flex-col items-center justify-center text-center text-gray-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-24 w-24 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
-                        <h3 className="text-xl font-semibold">یک سفارش را انتخاب کنید</h3>
-                        <p className="mt-2">برای مشاهده یا ویرایش جزئیات، یک سفارش از لیست انتخاب کنید یا یک سفارش جدید ایجاد نمایید.</p>
-                    </div>
                 )}
-            </main>
-            
-            <Modal show={showModal} onClose={() => setShowModal(false)} maxWidth="max-w-md">
-                <h2 className="text-xl font-bold mb-4 text-gray-800">انتخاب فرآیند</h2>
+            </Modal>
+
+            <Modal show={showNewOrderModal} onClose={() => setShowNewOrderModal(false)} maxWidth="max-w-md">
+                <h2 className="text-xl font-bold mb-4 text-gray-800">ایجاد سفارش جدید</h2>
                 <p className="text-gray-600 mb-6">این سفارش بر اساس کدام فرآیند ایجاد شود؟</p>
                 <div className="space-y-3">
                     {workflows.map((wf: Workflow) => (
@@ -108,7 +192,6 @@ const WorkflowView: React.FC = () => {
                         </button>
                     ))}
                 </div>
-                <button onClick={() => setShowModal(false)} className="mt-6 w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-lg transition-colors">بستن</button>
             </Modal>
         </div>
     );

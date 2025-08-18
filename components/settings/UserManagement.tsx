@@ -14,8 +14,8 @@ const UserForm: React.FC<{ user: Partial<User>; onSave: (user: Partial<User>) =>
     };
 
     const handleSave = () => {
-        if (!localUser.username || !localUser.role || (!localUser.id && !localUser.password)) {
-            showNotification("نام کاربری، رمز عبور و نقش الزامی است", "error");
+        if (!localUser.username?.trim() || !localUser.role || (!localUser.id && !localUser.password?.trim())) {
+            showNotification("نام کاربری، نقش و (برای کاربر جدید) رمز عبور الزامی است.", "error");
             return;
         }
         onSave(localUser);
@@ -54,11 +54,18 @@ const UserManagement: React.FC = () => {
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
     const handleSave = (userToSave: Partial<User>) => {
+        const trimmedUsername = userToSave.username?.trim();
+
         if (userToSave.id) { // Update
             setUsers(prev => prev.map(u => {
                 if (u.id === userToSave.id) {
-                    const updatedUser = { ...u, username: userToSave.username!, role: userToSave.role! };
-                    if (userToSave.password) {
+                    const updatedUser: User = {
+                        ...u,
+                        username: trimmedUsername!,
+                        role: userToSave.role!
+                    };
+                    // Only update password if a new, non-empty one is provided
+                    if (userToSave.password && userToSave.password.trim()) {
                         updatedUser.password = userToSave.password;
                     }
                     return updatedUser;
@@ -66,12 +73,12 @@ const UserManagement: React.FC = () => {
                 return u;
             }));
             showNotification("کاربر با موفقیت به‌روزرسانی شد");
-            logActivity('UPDATE', 'User', `کاربر '${userToSave.username}' را به‌روزرسانی کرد.`, userToSave.id);
+            logActivity('UPDATE', 'User', `کاربر '${trimmedUsername}' را به‌روزرسانی کرد.`, userToSave.id);
         } else { // Create
             const newUser: User = {
                 id: generateId('user'),
-                username: userToSave.username!,
-                password: userToSave.password!,
+                username: trimmedUsername!,
+                password: userToSave.password!, // Validation is in form
                 role: userToSave.role!,
             };
             setUsers(prev => [...prev, newUser]);
