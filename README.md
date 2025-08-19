@@ -1,20 +1,32 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
 
-# Run and deploy your AI Studio app
+# EZ Dashboard - Full Stack Application
 
-This contains everything you need to run your app locally.
+This project contains both a frontend application and a backend server. The backend serves the frontend files, so you only need to run one command.
 
-View your app in AI Studio: https://ai.studio/apps/drive/13gOp2Aci4CtiHLAsZIGUg5aK5u9vyC1d
+## Running the Application
 
-## Run Locally
+**Requirements:**
+- [Node.js](https://nodejs.org/) (which includes npm) installed on your system.
 
-**Prerequisites:**  Node.js
+**Instructions:**
 
+1.  **Install Dependencies:**
+    If you haven't already, open your terminal in the project's root directory and run the following command to install the necessary packages (`express` and `cors`):
+    ```bash
+    npm install
+    ```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+2.  **Start the Server:**
+    After the installation is complete, start the server with this command:
+    ```bash
+    npm start
+    ```
+    You should see a message in your terminal: `Backend server is running on http://localhost:3001`.
+
+3.  **Access the Application:**
+    Open your web browser and navigate to the following URL:
+    ```
+    http://localhost:3001
+    ```
+
+The application will load, and all data communication will happen with the integrated backend server. Data is stored in the `db.json` file.

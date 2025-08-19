@@ -1,31 +1,3 @@
 
-import React, { useState, useCallback } from 'react';
-
-export function useLocalStorage<T,>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
-  const [storedValue, setStoredValue] = useState<T>(() => {
-    if (typeof window === 'undefined') {
-      return initialValue;
-    }
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      console.error(error);
-      return initialValue;
-    }
-  });
-
-  const setValue = useCallback<React.Dispatch<React.SetStateAction<T>>>((value) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(key, JSON.stringify(valueToStore));
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  }, [key, storedValue]);
-
-  return [storedValue, setValue];
-}
+// This hook is no longer used as data persistence is now handled by a central server API.
+// The entire application has been refactored to use fetch for data communication.

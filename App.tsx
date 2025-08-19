@@ -1,9 +1,8 @@
-import React, { useState, useMemo, useCallback } from 'react';
+
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { AppContext, AppContextType, View } from './contexts/AppContext.ts';
-import { useLocalStorage } from './hooks/useLocalStorage.ts';
 import { useNotification } from './hooks/useNotification.ts';
 import { Product, Order, Workflow, Proforma, User, ActivityLog } from './types.ts';
-import { DEFAULT_WORKFLOW, DEFAULT_USERS } from './constants.ts';
 import { generateId } from './utils/idUtils.ts';
 import HomeView from './components/views/HomeView.tsx';
 import WorkflowView from './components/views/WorkflowView.tsx';
@@ -13,6 +12,62 @@ import ReportsView from './components/views/ReportsView.tsx';
 import SettingsView from './components/views/SettingsView.tsx';
 import LoginView from './components/views/LoginView.tsx';
 import ActivityView from './components/views/ActivityView.tsx';
+
+// =================================================================
+// شروع: سرویس API واقعی
+// نکته برای توسعه‌دهنده: این بخش با سرور واقعی Node.js که در فایل server.js تعریف شده، ارتباط برقرار می‌کند.
+// اطمینان حاصل کنید که سرور بک‌اند قبل از اجرای برنامه، در حال اجرا باشد.
+// =================================================================
+
+const API_BASE_URL = '';
+
+interface Database {
+    workflows: Workflow[];
+    orders: Order[];
+    products: Product[];
+    proformas: Proforma[];
+    users: User[];
+    activityLogs: ActivityLog[];
+}
+
+const api = {
+    fetchAllData: async (): Promise<Database> => {
+        const response = await fetch(`${API_BASE_URL}/api/data`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch data from server.');
+        }
+        return response.json();
+    },
+
+    saveData: async <K extends keyof Database>(key: K, data: Database[K]): Promise<Database[K]> => {
+        const response = await fetch(`${API_BASE_URL}/api/data/${key}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to save data for ${key}.`);
+        }
+        return response.json();
+    },
+
+    login: async (username: string, password: string): Promise<User> => {
+        const response = await fetch(`${API_BASE_URL}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }),
+        });
+        if (!response.ok) {
+            throw new Error('Unauthorized');
+        }
+        return response.json();
+    }
+};
+
+// =================================================================
+// پایان: سرویس API واقعی
+// =================================================================
+
 
 const PERMISSIONS: { [key in View]: User['role'][] } = {
     home: ['admin', 'sales', 'procurement'],
@@ -25,20 +80,109 @@ const PERMISSIONS: { [key in View]: User['role'][] } = {
 };
 
 const App: React.FC = () => {
-    const [workflows, setWorkflows] = useLocalStorage<Workflow[]>("workflows_v12", [DEFAULT_WORKFLOW]);
-    const [orders, setOrders] = useLocalStorage<Order[]>("orders_v12", []);
-    const [products, setProducts] = useLocalStorage<Product[]>("products_v12", []);
-    const [proformas, setProformas] = useLocalStorage<Proforma[]>("proformas_v12", []);
-    const [users, setUsers] = useLocalStorage<User[]>("users_v12", DEFAULT_USERS);
+    const [isLoading, setIsLoading] = useState(true);
+    const [workflows, setWorkflowsState] = useState<Workflow[]>([]);
+    const [orders, setOrdersState] = useState<Order[]>([]);
+    const [products, setProductsState] = useState<Product[]>([]);
+    const [proformas, setProformasState] = useState<Proforma[]>([]);
+    const [users, setUsersState] = useState<User[]>([]);
     const [currentUser, setCurrentUser] = useState<User | null>(null);
-    const [activityLogs, setActivityLogs] = useLocalStorage<ActivityLog[]>("activity_logs_v1", []);
+    const [activityLogs, setActivityLogsState] = useState<ActivityLog[]>([]);
 
     const [activeView, setActiveView] = useState<View>('home');
     const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
     const { showNotification, NotificationComponent } = useNotification();
     
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                const data = await api.fetchAllData();
+                setWorkflowsState(data.workflows);
+                setOrdersState(data.orders);
+                setProductsState(data.products);
+                setProformasState(data.proformas);
+                setUsersState(data.users);
+                setActivityLogsState(data.activityLogs);
+            } catch (error) {
+                console.error("Failed to load data from server", error);
+                showNotification("خطا در اتصال به سرور. لطفاً از اجرای بک‌اند مطمئن شوید.", "error");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        loadData();
+    }, [showNotification]);
+    
+    // Create setters that perform optimistic UI updates and call the API
+    const setWorkflows = useCallback((value: React.SetStateAction<Workflow[]>) => {
+        setWorkflowsState(current => {
+            const newValue = value instanceof Function ? value(current) : value;
+            api.saveData('workflows', newValue).catch(err => {
+                console.error("API save failed for workflows:", err);
+                showNotification('خطا در ذخیره فرآیندها', 'error');
+                // Optional: Rollback state to `current` here
+            });
+            return newValue;
+        });
+    }, [showNotification]);
+    
+    const setOrders = useCallback((value: React.SetStateAction<Order[]>) => {
+        setOrdersState(current => {
+            const newValue = value instanceof Function ? value(current) : value;
+            api.saveData('orders', newValue).catch(err => {
+                console.error("API save failed for orders:", err);
+                showNotification('خطا در ذخیره سفارشات', 'error');
+            });
+            return newValue;
+        });
+    }, [showNotification]);
+
+    const setProducts = useCallback((value: React.SetStateAction<Product[]>) => {
+        setProductsState(current => {
+            const newValue = value instanceof Function ? value(current) : value;
+            api.saveData('products', newValue).catch(err => {
+                console.error("API save failed for products:", err);
+                showNotification('خطا در ذخیره کالاها', 'error');
+            });
+            return newValue;
+        });
+    }, [showNotification]);
+    
+    const setProformas = useCallback((value: React.SetStateAction<Proforma[]>) => {
+        setProformasState(current => {
+            const newValue = value instanceof Function ? value(current) : value;
+            api.saveData('proformas', newValue).catch(err => {
+                console.error("API save failed for proformas:", err);
+                showNotification('خطا در ذخیره پیش‌فاکتورها', 'error');
+            });
+            return newValue;
+        });
+    }, [showNotification]);
+
+    const setUsers = useCallback((value: React.SetStateAction<User[]>) => {
+        setUsersState(current => {
+            const newValue = value instanceof Function ? value(current) : value;
+            api.saveData('users', newValue).catch(err => {
+                console.error("API save failed for users:", err);
+                showNotification('خطا در ذخیره کاربران', 'error');
+            });
+            return newValue;
+        });
+    }, [showNotification]);
+
+    const setActivityLogs = useCallback((value: React.SetStateAction<ActivityLog[]>) => {
+        setActivityLogsState(current => {
+            const newValue = value instanceof Function ? value(current) : value;
+            api.saveData('activityLogs', newValue).catch(err => {
+                console.error("API save failed for activityLogs:", err);
+                showNotification('خطا در ذخیره گزارشات', 'error');
+            });
+            return newValue;
+        });
+    }, [showNotification]);
+
     const logActivity = useCallback((action: ActivityLog['action'], entityType: ActivityLog['entityType'], details: string, entityId?: string) => {
-        if (!currentUser) return; // Should not happen if called correctly
+        if (!currentUser) return;
         const newLog: ActivityLog = {
             id: generateId('log'),
             timestamp: new Date().toISOString(),
@@ -52,30 +196,20 @@ const App: React.FC = () => {
         setActivityLogs(prev => [newLog, ...prev]);
     }, [currentUser, setActivityLogs]);
 
-    const login = useCallback((username: string, password: string): boolean => {
-        const user = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
-        if (user) {
-            const { password, ...userWithoutPassword } = user;
-            setCurrentUser(userWithoutPassword);
+    const login = useCallback(async (username: string, password: string): Promise<boolean> => {
+        try {
+            const user = await api.login(username, password);
+            setCurrentUser(user);
             setActiveView('home');
             showNotification(`خوش آمدید ${user.username}!`);
-            // We need to log after currentUser is set, so we construct the log manually here.
-            const newLog: ActivityLog = {
-                id: generateId('log'),
-                timestamp: new Date().toISOString(),
-                userId: user.id,
-                username: user.username,
-                action: 'LOGIN',
-                entityType: 'System',
-                details: `کاربر ${user.username} وارد سیستم شد.`,
-                entityId: user.id,
-            };
-            setActivityLogs(prev => [newLog, ...prev]);
+            logActivity('LOGIN', 'System', `کاربر ${user.username} وارد سیستم شد.`, user.id);
             return true;
+        } catch (error) {
+            console.error("Login failed:", error);
+            showNotification("نام کاربری یا رمز عبور اشتباه است", "error");
+            return false;
         }
-        showNotification("نام کاربری یا رمز عبور اشتباه است", "error");
-        return false;
-    }, [users, showNotification, setActivityLogs]);
+    }, [showNotification, logActivity]);
 
     const logout = useCallback(() => {
         if (currentUser) {
@@ -99,8 +233,20 @@ const App: React.FC = () => {
         setSelectedOrderId,
         activityLogs, setActivityLogs,
         logActivity
-    }), [workflows, orders, products, proformas, users, currentUser, login, logout, showNotification, selectedOrderId, activityLogs, logActivity]);
+    }), [workflows, orders, products, proformas, users, currentUser, login, logout, showNotification, selectedOrderId, activityLogs, logActivity, setWorkflows, setOrders, setProducts, setProformas, setUsers, setActivityLogs]);
     
+     if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-100 font-sans">
+                <NotificationComponent />
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600 text-lg">...در حال اتصال به سرور</p>
+                </div>
+            </div>
+        );
+    }
+
     if (!currentUser) {
         return (
             <AppContext.Provider value={contextValue}>

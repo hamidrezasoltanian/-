@@ -1,0 +1,150 @@
+
+{
+  "workflows": [
+    {
+      "id": "wf_1721511902802_s7c5a9g0h",
+      "name": "فرآیند پیش‌فرض واردات",
+      "steps": [
+        {
+          "id": "step_1721511902802_lqgq3x22y",
+          "title": "ثبت اولیه",
+          "fields": [
+            {
+              "id": "field_1721511902802_y1kdxp20k",
+              "name": "order_date",
+              "label": "تاریخ ثبت",
+              "type": "date",
+              "required": true,
+              "width": "half"
+            },
+            {
+              "id": "field_1721511902802_f3p8x0k3e",
+              "name": "customer_name",
+              "label": "نام مشتری",
+              "type": "text",
+              "required": true,
+              "width": "half"
+            },
+            {
+              "id": "field_1721511902803_5p0q8x1zj",
+              "name": "products_list",
+              "label": "لیست کالاها",
+              "type": "product",
+              "required": true,
+              "width": "full"
+            }
+          ]
+        },
+        {
+          "id": "step_1721511902803_3s8o4j6x8",
+          "title": "ارسال",
+          "fields": [
+            {
+              "id": "field_1721511902803_y8o9a3b2f",
+              "name": "shipping_date",
+              "label": "تاریخ ارسال",
+              "type": "date",
+              "required": false,
+              "width": "half"
+            },
+            {
+              "id": "field_1721511902803_q9p0r2s4t",
+              "name": "tracking_code",
+              "label": "کد رهگیری",
+              "type": "text",
+              "required": false,
+              "width": "half"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "orders": [
+    {
+      "id": "order_1721511902803_k1l2m3n4p",
+      "workflowId": "wf_1721511902802_s7c5a9g0h",
+      "created_at": "2024-07-18T21:45:02.803Z",
+      "title": "سفارش نمونه قطعات کامپیوتری",
+      "steps_data": {
+        "step_1721511902802_lqgq3x22y": {
+          "data": {
+            "order_date": "2024-07-18T21:45:02.803Z",
+            "customer_name": "شرکت فناوری پیشرو",
+            "products_list": [
+              {
+                "productId": "prod_1721511902801_abcdef123",
+                "quantity": 10
+              },
+              {
+                "productId": "prod_1721511902802_uvwxyz789",
+                "quantity": 25
+              }
+            ]
+          },
+          "completed_at": "2024-07-18T21:45:02.803Z"
+        }
+      }
+    }
+  ],
+  "products": [
+    {
+      "id": "prod_1721511902801_abcdef123",
+      "name": "پردازنده مرکزی Intel Core i9",
+      "code": "CPU-INT-i9",
+      "irc": "1234567890123456",
+      "netWeight": "0.5",
+      "grossWeight": "0.8",
+      "description": "نسل جدید پردازنده‌های اینتل با قدرت پردازشی فوق‌العاده برای کاربردهای حرفه‌ای.",
+      "currencyPrice": "550",
+      "currencyType": "USD",
+      "manufacturer": "Intel Inc."
+    },
+    {
+      "id": "prod_1721511902802_ghijkl456",
+      "name": "کارت گرافیک Nvidia RTX 4090",
+      "code": "GPU-NV-4090",
+      "irc": "9876543210987654",
+      "netWeight": "1.2",
+      "grossWeight": "1.9",
+      "description": "قدرتمندترین کارت گرافیک برای گیمینگ و رندرینگ با معماری Ada Lovelace.",
+      "currencyPrice": "1600",
+      "currencyType": "USD",
+      "manufacturer": "Nvidia Corp."
+    },
+    {
+      "id": "prod_1721511902802_uvwxyz789",
+      "name": "حافظه SSD Samsung 980 Pro 2TB",
+      "code": "SSD-SAM-980P2",
+      "irc": "5555666677778888",
+      "netWeight": "0.1",
+      "grossWeight": "0.2",
+      "description": "حافظه NVMe PCIe 4.0 با سرعت خواندن و نوشتن بی‌نظیر.",
+      "currencyPrice": "180",
+      "currencyType": "USD",
+      "manufacturer": "Samsung Electronics"
+    }
+  ],
+  "proformas": [],
+  "users": [
+    {
+      "id": "user_1721511902802_adminuser",
+      "username": "admin",
+      "password": "123",
+      "role": "admin"
+    },
+    {
+      "id": "user_1721511902802_salesuser",
+      "username": "sales",
+      "password": "123",
+      "role": "sales"
+    },
+    {
+      "id": "user_1721511902802_procuser",
+      "username": "procurement",
+      "password": "123",
+      "role": "procurement"
+    }
+  ],
+  "activityLogs": []
+}

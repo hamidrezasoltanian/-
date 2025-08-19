@@ -1,22 +1,14 @@
+
 {
-  "name": "ez-dashboard",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "name": "ez-dashboard-backend",
+  "version": "1.0.0",
+  "description": "Backend server for EZ Dashboard",
+  "main": "server.js",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "start": "node server.js"
   },
   "dependencies": {
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "@google/genai": "^1.14.0",
-    "recharts": "^3.1.2"
-  },
-  "devDependencies": {
-    "@types/node": "^22.14.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
   }
 }
