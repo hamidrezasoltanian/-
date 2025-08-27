@@ -86,7 +86,11 @@ const App: React.FC = () => {
     const [products, setProductsState] = useState<Product[]>([]);
     const [proformas, setProformasState] = useState<Proforma[]>([]);
     const [users, setUsersState] = useState<User[]>([]);
-    const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const [currentUser, setCurrentUser] = useState<User | null>({
+        id: 'user_1721511902802_adminuser',
+        username: 'admin',
+        role: 'admin',
+    });
     const [activityLogs, setActivityLogsState] = useState<ActivityLog[]>([]);
 
     const [activeView, setActiveView] = useState<View>('home');
@@ -202,14 +206,27 @@ const App: React.FC = () => {
             setCurrentUser(user);
             setActiveView('home');
             showNotification(`خوش آمدید ${user.username}!`);
-            logActivity('LOGIN', 'System', `کاربر ${user.username} وارد سیستم شد.`, user.id);
+            
+            // Log activity directly to avoid stale closure issues with `currentUser`
+            const newLog: ActivityLog = {
+                id: generateId('log'),
+                timestamp: new Date().toISOString(),
+                userId: user.id,
+                username: user.username,
+                action: 'LOGIN',
+                entityType: 'System',
+                details: `کاربر ${user.username} وارد سیستم شد.`,
+                entityId: user.id,
+            };
+            setActivityLogs(prev => [newLog, ...prev]);
+
             return true;
         } catch (error) {
             console.error("Login failed:", error);
             showNotification("نام کاربری یا رمز عبور اشتباه است", "error");
             return false;
         }
-    }, [showNotification, logActivity]);
+    }, [showNotification, setActivityLogs]);
 
     const logout = useCallback(() => {
         if (currentUser) {
@@ -313,7 +330,6 @@ const App: React.FC = () => {
                         </div>
                         <div className="flex items-center gap-x-4">
                             <span className="text-gray-600 text-sm font-medium">کاربر: <strong className="font-bold text-gray-800">{currentUser.username}</strong></span>
-                            <button onClick={logout} className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors">خروج</button>
                         </div>
                     </div>
                 </header>

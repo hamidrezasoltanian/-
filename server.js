@@ -1,11 +1,11 @@
-
 const express = require('express');
 const fs = require('fs');
 const cors = require('cors');
 const path = require('path');
 
 const app = express();
-const PORT = 3001;
+// Use the PORT from environment variables, with a fallback to 3001 for local development.
+const PORT = process.env.PORT || 3001;
 const DB_FILE = path.join(__dirname, 'db.json');
 
 // Middleware
