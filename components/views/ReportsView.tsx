@@ -206,13 +206,30 @@ const ReportsView: React.FC = () => {
                 
                 <div className="bg-white p-6 rounded-xl shadow-lg">
                     <h3 className="text-xl font-semibold mb-4 text-gray-800">میانگین زمان بین مراحل فرآیند (ساعت)</h3>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={reportData.stepDurations} margin={{ top: 5, right: 20, left: -10, bottom: 60 }}>
+                    <ResponsiveContainer width="100%" height={350}>
+                        <BarChart data={reportData.stepDurations} margin={{ top: 20, right: 20, left: -10, bottom: 80 }}>
+                            <defs>
+                                <linearGradient id="colorHours" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#ffc658" stopOpacity={0.9}/>
+                                    <stop offset="95%" stopColor="#f3a60d" stopOpacity={0.6}/>
+                                </linearGradient>
+                            </defs>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                            <XAxis dataKey="name" angle={-45} textAnchor="end" interval={0} tick={{ fontSize: 11 }} />
-                            <YAxis />
-                            <Tooltip formatter={(value: number) => [value, 'ساعت']} cursor={{fill: 'rgba(239, 246, 255, 0.7)'}} />
-                            <Bar dataKey="ساعت" fill="#ffc658" barSize={50} radius={[4, 4, 0, 0]} />
+                            <XAxis dataKey="name" angle={-45} textAnchor="end" interval={0} tick={{ fontSize: 11 }} height={90} />
+                            <YAxis tick={{ fontSize: 11 }} />
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                    backdropFilter: 'blur(5px)',
+                                    border: '1px solid #ddd',
+                                    borderRadius: '12px',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                                }}
+                                formatter={(value: number) => [`${value}`, 'ساعت']}
+                                cursor={{ fill: 'rgba(255, 198, 88, 0.2)' }}
+                            />
+                            <Legend verticalAlign="top" wrapperStyle={{ paddingBottom: '15px' }} />
+                            <Bar name="میانگین زمان" dataKey="ساعت" fill="url(#colorHours)" barSize={50} radius={[6, 6, 0, 0]} />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>

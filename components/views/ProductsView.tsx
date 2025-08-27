@@ -97,6 +97,7 @@ const ProductsView: React.FC = () => {
     const { products, setProducts, showNotification, currentUser, logActivity } = context;
 
     const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
+    const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -253,7 +254,7 @@ const ProductsView: React.FC = () => {
                     <tbody className="bg-white divide-y divide-gray-200">
                         {filteredProducts.map(p => (
                             <tr key={p.id} className="hover:bg-gray-50 transition-colors">
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{p.name}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 cursor-pointer hover:text-blue-600 transition-colors" onClick={() => setViewingProduct(p)}>{p.name}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{p.code}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{p.manufacturer}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatNumber(p.currencyPrice)} {p.currencyType}</td>
@@ -276,6 +277,47 @@ const ProductsView: React.FC = () => {
 
             <Modal show={!!editingProduct} onClose={() => setEditingProduct(null)}>
                 {editingProduct && <ProductForm product={editingProduct} onSave={handleSave} onCancel={() => setEditingProduct(null)} showNotification={showNotification} />}
+            </Modal>
+            
+            <Modal show={!!viewingProduct} onClose={() => setViewingProduct(null)} maxWidth="max-w-xl">
+                {viewingProduct && (
+                    <div>
+                        <h2 className="text-2xl font-bold mb-6 text-gray-800">جزئیات کالا</h2>
+                        <dl className="space-y-2 text-gray-700">
+                            <div className="grid grid-cols-3 gap-4 p-3 rounded-lg hover:bg-gray-50">
+                                <dt className="font-semibold text-gray-500">نام کالا:</dt>
+                                <dd className="col-span-2">{viewingProduct.name}</dd>
+                            </div>
+                            <div className="grid grid-cols-3 gap-4 p-3 rounded-lg hover:bg-gray-50">
+                                <dt className="font-semibold text-gray-500">کد کالا:</dt>
+                                <dd className="col-span-2">{viewingProduct.code}</dd>
+                            </div>
+                            <div className="grid grid-cols-3 gap-4 p-3 rounded-lg hover:bg-gray-50">
+                                <dt className="font-semibold text-gray-500">کد IRC:</dt>
+                                <dd className="col-span-2">{viewingProduct.irc || '-'}</dd>
+                            </div>
+                             <div className="grid grid-cols-3 gap-4 p-3 rounded-lg hover:bg-gray-50">
+                                <dt className="font-semibold text-gray-500">تولیدکننده:</dt>
+                                <dd className="col-span-2">{viewingProduct.manufacturer || '-'}</dd>
+                            </div>
+                            <div className="grid grid-cols-3 gap-4 p-3 rounded-lg hover:bg-gray-50">
+                                <dt className="font-semibold text-gray-500">وزن خالص:</dt>
+                                <dd className="col-span-2">{viewingProduct.netWeight ? `${viewingProduct.netWeight} Kg` : '-'}</dd>
+                            </div>
+                            <div className="grid grid-cols-3 gap-4 p-3 rounded-lg hover:bg-gray-50">
+                                <dt className="font-semibold text-gray-500">قیمت ارزی:</dt>
+                                <dd className="col-span-2">{formatNumber(viewingProduct.currencyPrice)} {viewingProduct.currencyType}</dd>
+                            </div>
+                            <div className="p-3 rounded-lg hover:bg-gray-50">
+                                <dt className="font-semibold text-gray-500 mb-2">توضیحات:</dt>
+                                <dd className="text-gray-600 text-sm whitespace-pre-wrap leading-relaxed">{viewingProduct.description || 'توضیحاتی ثبت نشده است.'}</dd>
+                            </div>
+                        </dl>
+                         <div className="mt-8 flex justify-end">
+                            <button onClick={() => setViewingProduct(null)} className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg transition-colors">بستن</button>
+                        </div>
+                    </div>
+                )}
             </Modal>
             
             <ConfirmationModal 
