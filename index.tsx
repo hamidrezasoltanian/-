@@ -1,28 +1,42 @@
-import React from 'react';
-import { createRoot } from 'react-dom/client';
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EZ Dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./index.css">
 
-// فرض می‌کنیم کامپوننت اصلی شما در این مسیر قرار دارد
-// اگر مسیر دیگری است، آن را اصلاح کنید
-import App from './src/App'; 
-
-const container = document.getElementById('root');
-
-if (container) {
-  try {
-    const root = createRoot(container);
-    // تلاش برای رندر کردن کامپوننت اصلی شما
-    root.render(<App />);
-  } catch (error) {
-    // در صورت بروز خطا در کامپوننت App، یک پیام خطا نمایش داده می‌شود
-    console.error("Error rendering the main App component:", error);
-    const root = createRoot(container);
-    root.render(
-      <div style={{ padding: '2rem', fontFamily: 'sans-serif', textAlign: 'center' }}>
-        <h1>خطا در بارگذاری اپلیکیشن</h1>
-        <p>لطفاً کنسول مرورگر را برای جزئیات بیشتر بررسی کنید.</p>
-      </div>
-    );
+  <!-- SystemJS and Babel for in-browser module loading and transpilation -->
+  <script src="https://unpkg.com/systemjs@6.15.1/dist/s.min.js"></script>
+  <script src="https://unpkg.com/systemjs-babel/dist/systemjs-babel.js"></script>
+  
+  <script type="systemjs-importmap">
+  {
+    "imports": {
+      "react": "https://cdn.jsdelivr.net/npm/react@18.3.1/+esm",
+      "react-dom": "https://cdn.jsdelivr.net/npm/react-dom@18.3.1/+esm",
+      "react-dom/client": "https://cdn.jsdelivr.net/npm/react-dom@18.3.1/client/+esm",
+      "react/jsx-runtime": "https://cdn.jsdelivr.net/npm/react@18.3.1/jsx-runtime/+esm",
+      "@google/genai": "https://esm.sh/@google/genai@0.14.0",
+      "recharts": "https://cdn.jsdelivr.net/npm/recharts@2.12.7/+esm"
+    },
+    "meta": {
+      "*.tsx": { "loader": "systemjs-babel" },
+      "*.ts": { "loader": "systemjs-babel" },
+      "*.js": { "loader": "systemjs-babel" }
+    }
   }
-} else {
-  console.error('Root element not found!');
-}
+  </script>
+
+</head>
+<body>
+  <div id="root"></div>
+  <!-- Load the main application entry point via SystemJS -->
+  <script type="systemjs-module">
+    System.import('./main.js');
+  </script>
+</body>
+</html>
