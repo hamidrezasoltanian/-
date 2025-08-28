@@ -1,17 +1,29 @@
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EZ Dashboard</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <!-- 
-      تغییر اصلی اینجاست:
-      مسیر اسکریپت به main.jsx تغییر کرده است.
-    -->
-    <script type="module" src="/main.jsx"></script>
-  </body>
-</html>
+{
+  "name": "ez-dashboard-backend",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@google/genai": "^0.14.0",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "recharts": "^2.12.7"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.39",
+    "tailwindcss": "^3.4.6",
+    "vite": "^5.3.4"
+  }
+}
