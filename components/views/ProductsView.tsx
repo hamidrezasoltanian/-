@@ -56,10 +56,13 @@ const ProductForm: React.FC<{ product: Partial<Product>; onSave: (product: Produ
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <input type="number" placeholder="وزن خالص (Kg)" value={localProduct.netWeight || ''} onChange={e => handleChange('netWeight', e.target.value)} className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500" />
-                     <input type="text" placeholder="شرکت تولید کننده" value={localProduct.manufacturer || ''} onChange={e => handleChange('manufacturer', e.target.value)} className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500" />
+                    <input type="number" placeholder="وزن ناخالص (Kg)" value={localProduct.grossWeight || ''} onChange={e => handleChange('grossWeight', e.target.value)} className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500" />
                 </div>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" placeholder="شرکت تولید کننده" value={localProduct.manufacturer || ''} onChange={e => handleChange('manufacturer', e.target.value)} className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500" />
                     <input type="number" placeholder="قیمت ارزی" value={localProduct.currencyPrice || ''} onChange={e => handleChange('currencyPrice', e.target.value)} className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500" />
+                 </div>
+                 <div className="grid grid-cols-1">
                     <select value={localProduct.currencyType || 'USD'} onChange={e => handleChange('currencyType', e.target.value)} className="w-full p-3 border rounded-lg bg-white appearance-none focus:ring-2 focus:ring-blue-500">
                         <option value="USD">USD</option>
                         <option value="EUR">EUR</option>
@@ -303,6 +306,10 @@ const ProductsView: React.FC = () => {
                             <div className="grid grid-cols-3 gap-4 p-3 rounded-lg hover:bg-gray-50">
                                 <dt className="font-semibold text-gray-500">وزن خالص:</dt>
                                 <dd className="col-span-2">{viewingProduct.netWeight ? `${viewingProduct.netWeight} Kg` : '-'}</dd>
+                            </div>
+                            <div className="grid grid-cols-3 gap-4 p-3 rounded-lg hover:bg-gray-50">
+                                <dt className="font-semibold text-gray-500">وزن ناخالص:</dt>
+                                <dd className="col-span-2">{viewingProduct.grossWeight ? `${viewingProduct.grossWeight} Kg` : '-'}</dd>
                             </div>
                             <div className="grid grid-cols-3 gap-4 p-3 rounded-lg hover:bg-gray-50">
                                 <dt className="font-semibold text-gray-500">قیمت ارزی:</dt>
