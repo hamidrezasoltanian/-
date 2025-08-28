@@ -8,16 +8,35 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="./index.css">
+
+  <!-- SystemJS and Babel for in-browser module loading and transpilation -->
+  <script src="https://unpkg.com/systemjs@6.15.1/dist/s.min.js"></script>
+  <script src="https://unpkg.com/systemjs-babel/dist/systemjs-babel.js"></script>
+  
+  <script type="systemjs-importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react@18.3.1",
+      "react-dom": "https://esm.sh/react-dom@18.3.1",
+      "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+      "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+      "@google/genai": "https://esm.sh/@google/genai@0.14.0",
+      "recharts": "https://cdn.jsdelivr.net/npm/recharts@2.12.7/+esm"
+    },
+    "meta": {
+      "*.tsx": { "loader": "systemjs-babel" },
+      "*.ts": { "loader": "systemjs-babel" },
+      "*.js": { "loader": "systemjs-babel" }
+    }
+  }
+  </script>
+
 </head>
 <body>
-  <!-- تگ اصلی اپلیکیشن -->
   <div id="root"></div>
-
-  <!-- 
-    تغییر اصلی اینجاست:
-    ما SystemJS را حذف کرده و main.js را به صورت یک اسکریپت معمولی فراخوانی می‌کنیم.
-    ویژگی defer باعث می‌شود این اسکریپت بعد از بارگذاری کامل صفحه اجرا شود.
-  -->
-  <script src="./main.js" defer></script>
+  <!-- Load the main application entry point via SystemJS -->
+  <script type="systemjs-module">
+    System.import('./main.js');
+  </script>
 </body>
 </html>
