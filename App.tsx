@@ -12,6 +12,7 @@ import ReportsView from './components/views/ReportsView.tsx';
 import SettingsView from './components/views/SettingsView.tsx';
 import LoginView from './components/views/LoginView.tsx';
 import ActivityView from './components/views/ActivityView.tsx';
+import { LogoutIcon } from './components/shared/Icons.tsx';
 
 // =================================================================
 // شروع: سرویس API واقعی
@@ -330,6 +331,14 @@ const App: React.FC = () => {
                         </div>
                         <div className="flex items-center gap-x-4">
                             <span className="text-gray-600 text-sm font-medium">کاربر: <strong className="font-bold text-gray-800">{currentUser.username}</strong></span>
+                            <button
+                                onClick={logout}
+                                className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                                title="خروج"
+                                aria-label="خروج از حساب کاربری"
+                            >
+                                <LogoutIcon className="h-5 w-5" />
+                            </button>
                         </div>
                     </div>
                 </header>
