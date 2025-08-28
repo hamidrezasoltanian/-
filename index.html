@@ -6,47 +6,18 @@
   <title>EZ Dashboard</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
   
-  <script>
-    if (typeof window.process === 'undefined') {
-      window.process = { env: {} };
-    }
-    window.process.env.API_KEY = 'AIzaSyBGQO13FcCZmBtitneX7kumZPdZxg0P0DU';
-  </script>
-
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <script src="https://unpkg.com/persian-date@1.1.0/dist/persian-date.min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://unpkg.com/kamadatepicker/dist/kamadatepicker.min.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/kamadatepicker/dist/kamadatepicker.min.css">
-  
   <link rel="stylesheet" href="./index.css">
-
-  <script src="https://unpkg.com/systemjs@6.15.1/dist/s.min.js"></script>
-  <script src="https://unpkg.com/systemjs-babel/dist/systemjs-babel.js"></script>
-  
-  <script type="systemjs-importmap">
-  {
-    "imports": {
-      "react": "https://esm.sh/react@18.3.1",
-      "react-dom": "https://esm.sh/react-dom@18.3.1",
-      "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
-      "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
-      "@google/genai": "https://esm.sh/@google/genai@0.14.0",
-      "recharts": "https://cdn.jsdelivr.net/npm/recharts@2.12.7/+esm"
-    },
-    "meta": {
-      "*.tsx": { "loader": "systemjs-babel" },
-      "*.ts": { "loader": "systemjs-babel" }
-    }
-  }
-  </script>
-
 </head>
 <body>
+  <!-- تگ اصلی اپلیکیشن -->
   <div id="root"></div>
-  <script type="systemjs-module">
-    System.import('./index.tsx');
-  </script>
+
+  <!-- 
+    تغییر اصلی اینجاست:
+    ما SystemJS را حذف کرده و main.js را به صورت یک اسکریپت معمولی فراخوانی می‌کنیم.
+    ویژگی defer باعث می‌شود این اسکریپت بعد از بارگذاری کامل صفحه اجرا شود.
+  -->
+  <script src="./main.js" defer></script>
 </body>
 </html>
