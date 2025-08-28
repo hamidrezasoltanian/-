@@ -156,10 +156,10 @@ const ProductsView: React.FC = () => {
     };
 
     const handleDownloadSample = () => {
-        const csvHeader = "name,code,irc,netWeight,currencyPrice,currencyType,manufacturer\n";
+        const csvHeader = "name,code,irc,netWeight,grossWeight,currencyPrice,currencyType,manufacturer\n";
         const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + csvHeader +
-            "کالای نمونه 1,PROD-001,12345,12.5,150.50,USD,سازنده نمونه الف\n" +
-            "کالای نمونه 2,PROD-002,67890,0.8,220.00,EUR,سازنده نمونه ب";
+            "کالای نمونه 1,PROD-001,12345,12.5,14,150.50,USD,سازنده نمونه الف\n" +
+            "کالای نمونه 2,PROD-002,67890,0.8,1,220.00,EUR,سازنده نمونه ب";
         
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
@@ -208,7 +208,7 @@ const ProductsView: React.FC = () => {
                         code: rowData.code,
                         irc: rowData.irc || '',
                         netWeight: rowData.netWeight || '',
-                        grossWeight: '',
+                        grossWeight: rowData.grossWeight || '',
                         description: '',
                         currencyPrice: rowData.currencyPrice || '0',
                         currencyType: rowData.currencyType === 'EUR' || rowData.currencyType === 'AED' ? rowData.currencyType : 'USD',
