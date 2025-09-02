@@ -4,6 +4,7 @@ import { generateId } from '../../utils/idUtils.ts';
 import ConfirmationModal from '../shared/ConfirmationModal.tsx';
 import WorkflowEditor from '../settings/WorkflowEditor.tsx';
 import UserManagement from '../settings/UserManagement.tsx';
+import AppearanceSettings from '../settings/AppearanceSettings.tsx';
 
 
 const BackupRestore: React.FC = () => {
@@ -172,6 +173,7 @@ const SettingsView: React.FC = () => {
                 <nav className="flex gap-x-6">
                     <button onClick={() => setActiveTab('workflows')} className={`py-2 px-3 text-lg border-b-2 font-medium transition-colors ${activeTab === 'workflows' ? 'tab-active' : 'border-transparent text-gray-500 hover:text-gray-800'}`}>فرآیندها</button>
                     <button onClick={() => setActiveTab('users')} className={`py-2 px-3 text-lg border-b-2 font-medium transition-colors ${activeTab === 'users' ? 'tab-active' : 'border-transparent text-gray-500 hover:text-gray-800'}`}>کاربران</button>
+                    <button onClick={() => setActiveTab('appearance')} className={`py-2 px-3 text-lg border-b-2 font-medium transition-colors ${activeTab === 'appearance' ? 'tab-active' : 'border-transparent text-gray-500 hover:text-gray-800'}`}>ظاهر</button>
                     <button onClick={() => setActiveTab('backup')} className={`py-2 px-3 text-lg border-b-2 font-medium transition-colors ${activeTab === 'backup' ? 'tab-active' : 'border-transparent text-gray-500 hover:text-gray-800'}`}>پشتیبان‌گیری</button>
                 </nav>
             </div>
@@ -179,6 +181,7 @@ const SettingsView: React.FC = () => {
             <div>
                 {activeTab === 'workflows' && <WorkflowSettings />}
                 {activeTab === 'users' && <UserManagement />}
+                {activeTab === 'appearance' && <AppearanceSettings />}
                 {activeTab === 'backup' && <BackupRestore />}
             </div>
         </div>

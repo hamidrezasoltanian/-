@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { AppContext, AppContextType, View } from './contexts/AppContext.ts';
 import { useLocalStorage } from './hooks/useLocalStorage.ts';
 import { useNotification } from './hooks/useNotification.ts';
+import { useTheme } from './hooks/useTheme.ts';
 import { Product, Order, Workflow, Proforma, User, ActivityLog } from './types.ts';
 import { DEFAULT_WORKFLOW, DEFAULT_USERS } from './constants.ts';
 import { generateId } from './utils/idUtils.ts';
@@ -25,6 +26,7 @@ const PERMISSIONS: { [key in View]: User['role'][] } = {
 };
 
 const App: React.FC = () => {
+    useTheme(); // Apply theme and background on load
     const [workflows, setWorkflows] = useLocalStorage<Workflow[]>("workflows_v12", [DEFAULT_WORKFLOW]);
     const [orders, setOrders] = useLocalStorage<Order[]>("orders_v12", []);
     const [products, setProducts] = useLocalStorage<Product[]>("products_v12", []);

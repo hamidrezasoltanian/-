@@ -28,3 +28,41 @@ body {
     background: #aaa;
 }
 .tab-active { color: #3b82f6; border-color: #3b82f6; }
+
+/* --- Theme Overrides --- */
+
+/* Green Theme */
+html.theme-green .tab-active { color: #16a34a; border-color: #16a34a; }
+html.theme-green .text-blue-600 { color: #16a34a; }
+html.theme-green .bg-blue-600 { background-color: #16a34a; }
+html.theme-green .hover\:bg-blue-700:hover { background-color: #15803d; }
+html.theme-green .bg-blue-500 { background-color: #22c55e; }
+html.theme-green .text-blue-500 { color: #22c55e; }
+html.theme-green .border-blue-500 { border-color: #16a34a; }
+html.theme-green .focus\:ring-blue-500:focus { --tw-ring-color: #16a34a; }
+html.theme-green input[type=checkbox]:checked { background-color: #16a34a; border-color: #16a34a; }
+
+/* Indigo Theme */
+html.theme-indigo .tab-active { color: #6366f1; border-color: #6366f1; }
+html.theme-indigo .text-blue-600 { color: #6366f1; }
+html.theme-indigo .bg-blue-600 { background-color: #6366f1; }
+html.theme-indigo .hover\:bg-blue-700:hover { background-color: #4f46e5; }
+html.theme-indigo .bg-blue-500 { background-color: #818cf8; }
+html.theme-indigo .text-blue-500 { color: #818cf8; }
+html.theme-indigo .border-blue-500 { border-color: #6366f1; }
+html.theme-indigo .focus\:ring-blue-500:focus { --tw-ring-color: #6366f1; }
+html.theme-indigo input[type=checkbox]:checked { background-color: #6366f1; border-color: #6366f1; }
+
+/* Background Image styling */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.08; /* Lowered opacity for better readability */
+    z-index: -1;
+    transition: background-image 0.3s ease-in-out;
+    background-color: transparent;
+}
