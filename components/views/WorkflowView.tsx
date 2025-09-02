@@ -1,11 +1,10 @@
 import React, { useState, useContext, useMemo, useEffect } from 'react';
 import { AppContext } from '../../contexts/AppContext.ts';
-import { Order, Workflow, Step, OrderStatus, OrderHistoryLog } from '../../types.ts';
+import { Order, Workflow, Step } from '../../types.ts';
 import { generateId } from '../../utils/idUtils.ts';
 import { toJalali } from '../../utils/dateUtils.ts';
 import OrderDetail from '../order/OrderDetail.tsx';
 import Modal from '../shared/Modal.tsx';
-import { SearchIcon } from '../shared/Icons.tsx';
 
 // Kanban Column Component
 interface KanbanColumnProps {
@@ -13,14 +12,6 @@ interface KanbanColumnProps {
     orders: Order[];
     onOrderSelect: (orderId: string) => void;
 }
-
-const STATUS_STYLES: { [key in OrderStatus]: { label: string; className: string; bgColorClass: string; } } = {
-    'in-progress': { label: 'در حال انجام', className: 'bg-blue-100 text-blue-800', bgColorClass: 'bg-blue-500' },
-    'completed': { label: 'تکمیل شده', className: 'bg-green-100 text-green-800', bgColorClass: 'bg-green-500' },
-    'on-hold': { label: 'معلق', className: 'bg-yellow-100 text-yellow-800', bgColorClass: 'bg-yellow-500' },
-    'cancelled': { label: 'لغو شده', className: 'bg-red-100 text-red-800', bgColorClass: 'bg-red-500' },
-};
-
 
 const KanbanColumn: React.FC<KanbanColumnProps> = ({ step, orders, onOrderSelect }) => (
     <div className="flex-shrink-0 w-80 bg-gray-100 rounded-xl flex flex-col max-h-full">
@@ -36,16 +27,10 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({ step, orders, onOrderSelect
                     <div
                         key={order.id}
                         onClick={() => onOrderSelect(order.id)}
-                        className="bg-white p-4 rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-all relative"
+                        className="bg-white p-4 rounded-lg shadow-sm cursor-pointer hover:shadow-md hover:border-blue-500 border-2 border-transparent transition-all"
                     >
-                        <div className="flex justify-between items-start">
-                            <p className="font-semibold text-gray-900 break-words">{order.title}</p>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${STATUS_STYLES[order.status]?.className || ''}`}>
-                               {STATUS_STYLES[order.status]?.label || order.status}
-                            </span>
-                        </div>
-                        <p className="text-sm text-gray-500 mt-2">{toJalali(order.created_at)}</p>
-                        <div className={`absolute right-0 top-0 bottom-0 w-1.5 rounded-r-lg ${STATUS_STYLES[order.status]?.bgColorClass || 'bg-gray-300'}`}></div>
+                        <p className="font-semibold text-gray-900 break-words">{order.title}</p>
+                        <p className="text-sm text-gray-500 mt-1">{toJalali(order.created_at)}</p>
                     </div>
                 ))}
             </div>
@@ -61,8 +46,6 @@ const WorkflowView: React.FC = () => {
     
     const [showNewOrderModal, setShowNewOrderModal] = useState(false);
     const [activeWorkflowId, setActiveWorkflowId] = useState<string | null>(workflows[0]?.id || null);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all');
 
     useEffect(() => {
         if (!activeWorkflowId && workflows.length > 0) {
@@ -73,28 +56,18 @@ const WorkflowView: React.FC = () => {
     const canEdit = currentUser?.role === 'admin' || currentUser?.role === 'sales';
 
     const handleAddOrder = (workflowId: string) => {
-        if (!canEdit || !currentUser) {
+        if (!canEdit) {
             showNotification("شما اجازه ایجاد سفارش جدید را ندارید", "error");
             return;
         }
         const workflow = workflows.find(wf => wf.id === workflowId);
         const orderTitle = `سفارش جدید - ${workflow?.name || ''} - ${toJalali(new Date().toISOString())}`;
-        
-        const creationLog: OrderHistoryLog = {
-            timestamp: new Date().toISOString(),
-            userId: currentUser.id,
-            username: currentUser.username,
-            detail: 'سفارش ایجاد شد.'
-        };
-
         const newOrder: Order = {
             id: generateId('order'),
             workflowId,
             created_at: new Date().toISOString(),
             title: orderTitle,
-            status: 'in-progress',
-            steps_data: {},
-            history: [creationLog]
+            steps_data: {}
         };
         setOrders(prev => [newOrder, ...prev]);
         setSelectedOrderId(newOrder.id);
@@ -130,22 +103,11 @@ const WorkflowView: React.FC = () => {
 
         const columns: { step: Step; orders: Order[] }[] = workflow.steps.map(step => ({ step, orders: [] }));
         
-        const filteredOrders = orders
-            .filter(o => {
-                if (o.workflowId !== activeWorkflowId) return false;
-                // Status filter
-                if (statusFilter !== 'all' && o.status !== statusFilter) {
-                    return false;
-                }
-                // Search term filter
-                const trimmedSearch = searchTerm.trim().toLowerCase();
-                if (trimmedSearch && !o.title.toLowerCase().includes(trimmedSearch)) {
-                    return false;
-                }
-                return true;
-            });
+        const workflowOrders = [...orders]
+            .filter(o => o.workflowId === activeWorkflowId)
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
-        filteredOrders.forEach(order => {
+        workflowOrders.forEach(order => {
             let lastCompletedStepIndex = -1;
             for (let i = workflow.steps.length - 1; i >= 0; i--) {
                 const step = workflow.steps[i];
@@ -162,57 +124,26 @@ const WorkflowView: React.FC = () => {
             columns[targetColumnIndex].orders.push(order);
         });
 
-        // Sort orders within each column by creation date (newest first)
-        columns.forEach(column => {
-            column.orders.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        });
-
         return columns;
-    }, [activeWorkflowId, orders, workflows, searchTerm, statusFilter]);
+    }, [activeWorkflowId, orders, workflows]);
 
 
     return (
         <div className="flex flex-col h-full p-4 md:p-6 bg-gray-50">
-            <header className="flex-shrink-0 mb-6 space-y-4">
-                <div className="flex justify-between items-center flex-wrap gap-4">
-                    <div>
-                         <h2 className="text-2xl md:text-3xl font-bold text-gray-800">گردش کار کانبان</h2>
-                         <p className="text-gray-500 mt-1">وضعیت سفارشات خود را در یک نگاه مدیریت کنید.</p>
-                    </div>
-                    {canEdit && <button onClick={() => setShowNewOrderModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-5 rounded-lg shadow-md hover:shadow-lg transition-all">+ سفارش جدید</button>}
+            <header className="flex-shrink-0 flex justify-between items-center mb-6 flex-wrap gap-4">
+                <div>
+                     <h2 className="text-2xl md:text-3xl font-bold text-gray-800">گردش کار کانبان</h2>
+                     <p className="text-gray-500 mt-1">وضعیت سفارشات خود را در یک نگاه مدیریت کنید.</p>
                 </div>
-
-                <div className="flex items-center gap-4 flex-wrap bg-gray-100 p-3 rounded-xl border">
-                     <div className="relative flex-grow min-w-[200px]">
-                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <SearchIcon className="h-5 w-5 text-gray-400" />
-                        </span>
-                        <input
-                            type="text"
-                            placeholder="جستجوی عنوان سفارش..."
-                            value={searchTerm}
-                            onChange={e => setSearchTerm(e.target.value)}
-                            className="w-full p-2 pl-10 border border-gray-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
-                    <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value as OrderStatus | 'all')}
-                        className="p-2 border border-gray-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-blue-500"
-                    >
-                        <option value="all">همه وضعیت‌ها</option>
-                        <option value="in-progress">در حال انجام</option>
-                        <option value="completed">تکمیل شده</option>
-                        <option value="on-hold">معلق</option>
-                        <option value="cancelled">لغو شده</option>
-                    </select>
+                <div className="flex items-center gap-4">
                     <select
                         value={activeWorkflowId || ''}
                         onChange={(e) => setActiveWorkflowId(e.target.value)}
-                        className="p-2 border border-gray-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-blue-500"
+                        className="p-3 border border-gray-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-blue-500 min-w-[200px]"
                     >
                         {workflows.map(wf => <option key={wf.id} value={wf.id}>{wf.name}</option>)}
                     </select>
+                    {canEdit && <button onClick={() => setShowNewOrderModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-5 rounded-lg shadow-md hover:shadow-lg transition-all">+ سفارش جدید</button>}
                 </div>
             </header>
             
@@ -228,11 +159,8 @@ const WorkflowView: React.FC = () => {
                             />
                         ))
                     ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-500 p-8 text-center">
-                           {orders.filter(o => o.workflowId === activeWorkflowId).length > 0 
-                                ? <p>هیچ سفارشی با فیلترهای اعمال شده مطابقت ندارد.</p>
-                                : <p>برای این فرآیند مرحله‌ای تعریف نشده یا فرآیندی انتخاب نشده است.</p>
-                           }
+                        <div className="w-full h-full flex items-center justify-center text-gray-500">
+                            <p>برای این فرآیند مرحله‌ای تعریف نشده یا فرآیندی انتخاب نشده است.</p>
                         </div>
                     )}
                 </div>

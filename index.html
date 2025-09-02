@@ -1,29 +1,63 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EZ Dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
+  
+  <script>
+    // Minimal polyfill to prevent "process is not defined" error in browser environments.
+    // The API_KEY is expected to be populated by the execution environment.
+    if (typeof window.process === 'undefined') {
+      window.process = { env: {} };
+    }
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Persian Date & Date Picker Libraries -->
+  <script src="https://unpkg.com/persian-date@1.1.0/dist/persian-date.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://unpkg.com/kamadatepicker/dist/kamadatepicker.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/kamadatepicker/dist/kamadatepicker.min.css">
+  
+  <link rel="stylesheet" href="./index.css">
+
+  <!-- SystemJS for robust in-browser module loading and transpilation -->
+  <script src="https://unpkg.com/systemjs@6.15.1/dist/s.min.js"></script>
+  <script src="https://unpkg.com/systemjs-babel/dist/systemjs-babel.js"></script>
+  
+  <script type="systemjs-importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react@18.3.1",
+      "react-dom": "https://esm.sh/react-dom@18.3.1",
+      "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+      "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+      "@google/genai": "https://esm.sh/@google/genai@0.14.0",
+      "recharts": "https://esm.sh/recharts@2.12.7?external=react,react-dom"
+    },
+    "meta": {
+      "*.tsx": { "loader": "systemjs-babel" },
+      "*.ts": { "loader": "systemjs-babel" }
+    }
+  }
+  </script>
+<script type="importmap">
 {
-  "name": "ez-dashboard-backend",
-  "version": "1.0.0",
-  "description": "",
-  "type": "module",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@google/genai": "^0.14.0",
-    "cors": "^2.8.5",
-    "express": "^4.19.2",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "recharts": "^2.12.7"
-  },
-  "devDependencies": {
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react": "^4.3.1",
-    "autoprefixer": "^10.4.19",
-    "postcss": "^8.4.39",
-    "tailwindcss": "^3.4.6",
-    "vite": "^5.3.4"
+  "imports": {
+    "react": "https://esm.sh/react@^19.1.1",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.1/",
+    "react/": "https://esm.sh/react@^19.1.1/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.14.0",
+    "recharts": "https://esm.sh/recharts@^3.1.2"
   }
 }
+</script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="systemjs-module" src="./index.tsx"></script>
+</body>
+</html>

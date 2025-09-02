@@ -10,17 +10,15 @@ const LoginView: React.FC = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!context) return;
-        
         if (!username || !password) {
-            context.showNotification("نام کاربری و رمز عبور الزامی است", "error");
+            context?.showNotification("نام کاربری و رمز عبور الزامی است", "error");
             return;
         }
         setIsLoading(true);
-        context.login(username, password)
-            .finally(() => {
-                setIsLoading(false);
-            });
+        setTimeout(() => {
+            context?.login(username, password);
+            setIsLoading(false);
+        }, 500);
     };
 
     return (
@@ -62,11 +60,11 @@ const LoginView: React.FC = () => {
                     </button>
                 </form>
                  <div className="text-xs text-gray-400 text-center pt-4 border-t">
-                    <p className="font-semibold">برای تست (تا زمان ساخت بک‌اند):</p>
+                    <p className="font-semibold">کاربران پیش‌فرض:</p>
                     <p>admin / 123 (مدیر)</p>
                     <p>sales / 123 (فروش)</p>
                     <p>procurement / 123 (بازرگانی)</p>
-                 </div>
+                </div>
             </div>
         </div>
     );

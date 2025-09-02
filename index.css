@@ -1,3 +1,30 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
+body, button, input, textarea, select { 
+  font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
+}
+body {
+  background-color: #f9fafb;
+}
+.date-input-container { position: relative; display: inline-block; width: 100%; }
+.date-input-icon {
+  position: absolute; left: 0.75rem; top: 50%;
+  transform: translateY(-50%); pointer-events: none; color: #9ca3af;
+}
+.date-input { padding-left: 2.5rem !important; }
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+}
+.tab-active { color: #3b82f6; border-color: #3b82f6; }

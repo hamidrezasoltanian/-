@@ -1,42 +1,16 @@
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EZ Dashboard</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
-  
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="./index.css">
 
-  <!-- SystemJS and Babel for in-browser module loading and transpilation -->
-  <script src="https://unpkg.com/systemjs@6.15.1/dist/s.min.js"></script>
-  <script src="https://unpkg.com/systemjs-babel/dist/systemjs-babel.js"></script>
-  
-  <script type="systemjs-importmap">
-  {
-    "imports": {
-      "react": "https://cdn.jsdelivr.net/npm/react@18.3.1/+esm",
-      "react-dom": "https://cdn.jsdelivr.net/npm/react-dom@18.3.1/+esm",
-      "react-dom/client": "https://cdn.jsdelivr.net/npm/react-dom@18.3.1/client/+esm",
-      "react/jsx-runtime": "https://cdn.jsdelivr.net/npm/react@18.3.1/jsx-runtime/+esm",
-      "@google/genai": "https://esm.sh/@google/genai@0.14.0",
-      "recharts": "https://cdn.jsdelivr.net/npm/recharts@2.12.7/+esm"
-    },
-    "meta": {
-      "*.tsx": { "loader": "systemjs-babel" },
-      "*.ts": { "loader": "systemjs-babel" },
-      "*.js": { "loader": "systemjs-babel" }
-    }
-  }
-  </script>
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App.tsx';
 
-</head>
-<body>
-  <div id="root"></div>
-  <!-- Load the main application entry point via SystemJS -->
-  <script type="systemjs-module">
-    System.import('./main.js');
-  </script>
-</body>
-</html>
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  throw new Error("Could not find root element to mount to");
+}
+
+const root = ReactDOM.createRoot(rootElement);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);

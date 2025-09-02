@@ -1,4 +1,3 @@
-
 export type FieldType = 'text' | 'number' | 'date' | 'textarea' | 'checkbox' | 'select' | 'product';
 export type FieldWidth = 'half' | 'full';
 
@@ -35,23 +34,11 @@ export interface OrderStepData {
   [key: string]: OrderStepFieldValue;
 }
 
-export type OrderStatus = 'in-progress' | 'completed' | 'on-hold' | 'cancelled';
-
-export interface OrderHistoryLog {
-  timestamp: string; // ISO date string
-  userId: string;
-  username: string;
-  // FIX: Removed typo 'd' before 'detail' to correctly define the property.
-  detail: string;
-}
-
 export interface Order {
   id: string;
   workflowId: string;
   created_at: string; // ISO date string
   title: string;
-  status: OrderStatus;
-  history: OrderHistoryLog[];
   steps_data: {
     [stepId: string]: {
       data: OrderStepData;

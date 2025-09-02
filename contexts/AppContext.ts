@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Product, Order, Workflow, Proforma, User, ActivityLog } from '../types.ts';
 
@@ -16,7 +15,7 @@ export interface AppContextType {
     users: User[];
     setUsers: React.Dispatch<React.SetStateAction<User[]>>;
     currentUser: User | null;
-    login: (username: string, password: string) => Promise<boolean>;
+    login: (username: string, password: string) => boolean;
     logout: () => void;
     showNotification: (message: string, type?: 'success' | 'error') => void;
     setActiveView: React.Dispatch<React.SetStateAction<View>>;

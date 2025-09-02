@@ -56,13 +56,10 @@ const ProductForm: React.FC<{ product: Partial<Product>; onSave: (product: Produ
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <input type="number" placeholder="وزن خالص (Kg)" value={localProduct.netWeight || ''} onChange={e => handleChange('netWeight', e.target.value)} className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500" />
-                    <input type="number" placeholder="وزن ناخالص (Kg)" value={localProduct.grossWeight || ''} onChange={e => handleChange('grossWeight', e.target.value)} className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500" />
+                     <input type="text" placeholder="شرکت تولید کننده" value={localProduct.manufacturer || ''} onChange={e => handleChange('manufacturer', e.target.value)} className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500" />
                 </div>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" placeholder="شرکت تولید کننده" value={localProduct.manufacturer || ''} onChange={e => handleChange('manufacturer', e.target.value)} className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500" />
                     <input type="number" placeholder="قیمت ارزی" value={localProduct.currencyPrice || ''} onChange={e => handleChange('currencyPrice', e.target.value)} className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500" />
-                 </div>
-                 <div className="grid grid-cols-1">
                     <select value={localProduct.currencyType || 'USD'} onChange={e => handleChange('currencyType', e.target.value)} className="w-full p-3 border rounded-lg bg-white appearance-none focus:ring-2 focus:ring-blue-500">
                         <option value="USD">USD</option>
                         <option value="EUR">EUR</option>
@@ -100,7 +97,6 @@ const ProductsView: React.FC = () => {
     const { products, setProducts, showNotification, currentUser, logActivity } = context;
 
     const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
-    const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -156,10 +152,10 @@ const ProductsView: React.FC = () => {
     };
 
     const handleDownloadSample = () => {
-        const csvHeader = "name,code,irc,netWeight,grossWeight,currencyPrice,currencyType,manufacturer\n";
+        const csvHeader = "name,code,irc,netWeight,currencyPrice,currencyType,manufacturer\n";
         const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + csvHeader +
-            "کالای نمونه 1,PROD-001,12345,12.5,14,150.50,USD,سازنده نمونه الف\n" +
-            "کالای نمونه 2,PROD-002,67890,0.8,1,220.00,EUR,سازنده نمونه ب";
+            "کالای نمونه 1,PROD-001,12345,12.5,150.50,USD,سازنده نمونه الف\n" +
+            "کالای نمونه 2,PROD-002,67890,0.8,220.00,EUR,سازنده نمونه ب";
         
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
@@ -208,7 +204,7 @@ const ProductsView: React.FC = () => {
                         code: rowData.code,
                         irc: rowData.irc || '',
                         netWeight: rowData.netWeight || '',
-                        grossWeight: rowData.grossWeight || '',
+                        grossWeight: '',
                         description: '',
                         currencyPrice: rowData.currencyPrice || '0',
                         currencyType: rowData.currencyType === 'EUR' || rowData.currencyType === 'AED' ? rowData.currencyType : 'USD',
@@ -257,7 +253,7 @@ const ProductsView: React.FC = () => {
                     <tbody className="bg-white divide-y divide-gray-200">
                         {filteredProducts.map(p => (
                             <tr key={p.id} className="hover:bg-gray-50 transition-colors">
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 cursor-pointer hover:text-blue-600 transition-colors" onClick={() => setViewingProduct(p)}>{p.name}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{p.name}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{p.code}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{p.manufacturer}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatNumber(p.currencyPrice)} {p.currencyType}</td>
@@ -280,51 +276,6 @@ const ProductsView: React.FC = () => {
 
             <Modal show={!!editingProduct} onClose={() => setEditingProduct(null)}>
                 {editingProduct && <ProductForm product={editingProduct} onSave={handleSave} onCancel={() => setEditingProduct(null)} showNotification={showNotification} />}
-            </Modal>
-            
-            <Modal show={!!viewingProduct} onClose={() => setViewingProduct(null)} maxWidth="max-w-xl">
-                {viewingProduct && (
-                    <div>
-                        <h2 className="text-2xl font-bold mb-6 text-gray-800">جزئیات کالا</h2>
-                        <dl className="space-y-2 text-gray-700">
-                            <div className="grid grid-cols-3 gap-4 p-3 rounded-lg hover:bg-gray-50">
-                                <dt className="font-semibold text-gray-500">نام کالا:</dt>
-                                <dd className="col-span-2">{viewingProduct.name}</dd>
-                            </div>
-                            <div className="grid grid-cols-3 gap-4 p-3 rounded-lg hover:bg-gray-50">
-                                <dt className="font-semibold text-gray-500">کد کالا:</dt>
-                                <dd className="col-span-2">{viewingProduct.code}</dd>
-                            </div>
-                            <div className="grid grid-cols-3 gap-4 p-3 rounded-lg hover:bg-gray-50">
-                                <dt className="font-semibold text-gray-500">کد IRC:</dt>
-                                <dd className="col-span-2">{viewingProduct.irc || '-'}</dd>
-                            </div>
-                             <div className="grid grid-cols-3 gap-4 p-3 rounded-lg hover:bg-gray-50">
-                                <dt className="font-semibold text-gray-500">تولیدکننده:</dt>
-                                <dd className="col-span-2">{viewingProduct.manufacturer || '-'}</dd>
-                            </div>
-                            <div className="grid grid-cols-3 gap-4 p-3 rounded-lg hover:bg-gray-50">
-                                <dt className="font-semibold text-gray-500">وزن خالص:</dt>
-                                <dd className="col-span-2">{viewingProduct.netWeight ? `${viewingProduct.netWeight} Kg` : '-'}</dd>
-                            </div>
-                            <div className="grid grid-cols-3 gap-4 p-3 rounded-lg hover:bg-gray-50">
-                                <dt className="font-semibold text-gray-500">وزن ناخالص:</dt>
-                                <dd className="col-span-2">{viewingProduct.grossWeight ? `${viewingProduct.grossWeight} Kg` : '-'}</dd>
-                            </div>
-                            <div className="grid grid-cols-3 gap-4 p-3 rounded-lg hover:bg-gray-50">
-                                <dt className="font-semibold text-gray-500">قیمت ارزی:</dt>
-                                <dd className="col-span-2">{formatNumber(viewingProduct.currencyPrice)} {viewingProduct.currencyType}</dd>
-                            </div>
-                            <div className="p-3 rounded-lg hover:bg-gray-50">
-                                <dt className="font-semibold text-gray-500 mb-2">توضیحات:</dt>
-                                <dd className="text-gray-600 text-sm whitespace-pre-wrap leading-relaxed">{viewingProduct.description || 'توضیحاتی ثبت نشده است.'}</dd>
-                            </div>
-                        </dl>
-                         <div className="mt-8 flex justify-end">
-                            <button onClick={() => setViewingProduct(null)} className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg transition-colors">بستن</button>
-                        </div>
-                    </div>
-                )}
             </Modal>
             
             <ConfirmationModal 
