@@ -145,7 +145,7 @@ const App: React.FC = () => {
 
     return (
         <AppContext.Provider value={contextValue}>
-            <div className="h-screen flex flex-col bg-gray-100 font-sans">
+            <div className="h-screen flex flex-col font-sans">
                 <NotificationComponent />
                 <header className="bg-white shadow-sm p-4 border-b z-10">
                     <div className="flex justify-between items-center max-w-screen-2xl mx-auto px-4">
@@ -173,7 +173,7 @@ const App: React.FC = () => {
                         </div>
                     </div>
                 </header>
-                <main className="flex-grow bg-gray-50 overflow-hidden">
+                <main className="flex-grow overflow-hidden">
                     {renderContent()}
                 </main>
             </div>

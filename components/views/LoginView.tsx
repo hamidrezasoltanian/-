@@ -1,4 +1,3 @@
-
 import React, { useState, useContext } from 'react';
 import { AppContext } from '../../contexts/AppContext.ts';
 
@@ -22,7 +21,7 @@ const LoginView: React.FC = () => {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="flex items-center justify-center min-h-screen">
             <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-2xl shadow-xl">
                 <div className="text-center">
                     <h1 className="text-3xl font-bold text-gray-800">
