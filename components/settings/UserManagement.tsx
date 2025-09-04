@@ -14,11 +14,11 @@ const UserForm: React.FC<{ user: Partial<User>; onSave: (user: Partial<User>) =>
     };
 
     const handleSave = () => {
-        if (!localUser.username?.trim() || !localUser.role || (!localUser.id && !localUser.password?.trim())) {
-            showNotification("نام کاربری، نقش و (برای کاربر جدید) رمز عبور الزامی است.", "error");
+        if (!localUser.username?.trim() || (!localUser.id && !localUser.password?.trim())) {
+            showNotification("نام کاربری و (برای کاربر جدید) رمز عبور الزامی است.", "error");
             return;
         }
-        onSave(localUser);
+        onSave({ ...localUser, role: 'admin' });
     };
 
     const isEditing = !!user.id;
@@ -29,12 +29,6 @@ const UserForm: React.FC<{ user: Partial<User>; onSave: (user: Partial<User>) =>
             <div className="space-y-4">
                 <input type="text" placeholder="نام کاربری" value={localUser.username || ''} onChange={e => handleChange('username', e.target.value)} className="w-full p-3 border rounded-lg bg-gray-50" />
                 <input type="password" placeholder={isEditing ? 'رمز عبور جدید (اختیاری)' : 'رمز عبور'} value={localUser.password || ''} onChange={e => handleChange('password', e.target.value)} className="w-full p-3 border rounded-lg bg-gray-50" />
-                <select value={localUser.role || ''} onChange={e => handleChange('role', e.target.value)} className="w-full p-3 border rounded-lg bg-white appearance-none">
-                    <option value="" disabled>انتخاب نقش</option>
-                    <option value="admin">مدیر</option>
-                    <option value="sales">کارشناس فروش</option>
-                    <option value="procurement">کارشناس بازرگانی</option>
-                </select>
             </div>
             <div className="mt-8 flex justify-end gap-4">
                 <button onClick={onCancel} className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">لغو</button>

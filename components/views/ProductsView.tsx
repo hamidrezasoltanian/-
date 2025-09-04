@@ -94,14 +94,14 @@ const ProductForm: React.FC<{ product: Partial<Product>; onSave: (product: Produ
 const ProductsView: React.FC = () => {
     const context = useContext(AppContext);
     if (!context) throw new Error("AppContext not found");
-    const { products, setProducts, showNotification, currentUser, logActivity } = context;
+    const { products, setProducts, showNotification, logActivity } = context;
 
     const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const canEdit = currentUser?.role === 'admin' || currentUser?.role === 'procurement';
+    const canEdit = true;
 
     const filteredProducts = useMemo(() => {
         if (!searchTerm) return products;

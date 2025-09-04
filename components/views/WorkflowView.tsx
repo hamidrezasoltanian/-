@@ -42,7 +42,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({ step, orders, onOrderSelect
 const WorkflowView: React.FC = () => {
     const context = useContext(AppContext);
     if (!context) throw new Error("AppContext not found");
-    const { orders, setOrders, workflows, showNotification, selectedOrderId, setSelectedOrderId, currentUser, logActivity } = context;
+    const { orders, setOrders, workflows, showNotification, selectedOrderId, setSelectedOrderId, logActivity } = context;
     
     const [showNewOrderModal, setShowNewOrderModal] = useState(false);
     const [activeWorkflowId, setActiveWorkflowId] = useState<string | null>(workflows[0]?.id || null);
@@ -53,7 +53,7 @@ const WorkflowView: React.FC = () => {
         }
     }, [workflows, activeWorkflowId]);
 
-    const canEdit = currentUser?.role === 'admin' || currentUser?.role === 'sales';
+    const canEdit = true;
 
     const handleAddOrder = (workflowId: string) => {
         if (!canEdit) {

@@ -15,16 +15,6 @@ import SettingsView from './components/views/SettingsView.tsx';
 import LoginView from './components/views/LoginView.tsx';
 import ActivityView from './components/views/ActivityView.tsx';
 
-const PERMISSIONS: { [key in View]: User['role'][] } = {
-    home: ['admin', 'sales', 'procurement'],
-    workflow: ['admin', 'sales', 'procurement'],
-    products: ['admin', 'sales', 'procurement'],
-    proforma: ['admin', 'sales'],
-    reports: ['admin'],
-    settings: ['admin'],
-    activity: ['admin'],
-};
-
 const App: React.FC = () => {
     useTheme(); // Apply theme and background on load
     const [workflows, setWorkflows] = useLocalStorage<Workflow[]>("workflows_v12", [DEFAULT_WORKFLOW]);
@@ -113,14 +103,6 @@ const App: React.FC = () => {
     }
     
     const renderContent = () => {
-        if (!PERMISSIONS[activeView]?.includes(currentUser.role)) {
-             return (
-                <div className="p-8 text-center text-red-600">
-                    <h2 className="text-2xl font-bold">عدم دسترسی</h2>
-                    <p>شما اجازه دسترسی به این بخش را ندارید.</p>
-                </div>
-            );
-        }
         switch (activeView) {
             case 'home': return <HomeView />;
             case 'workflow': return <WorkflowView />;
@@ -141,7 +123,7 @@ const App: React.FC = () => {
         { key: 'reports', label: 'گزارشات' },
         { key: 'activity', label: 'فعالیت‌ها' },
         { key: 'settings', label: 'تنظیمات' }
-    ].filter(tab => PERMISSIONS[tab.key as View].includes(currentUser.role));
+    ];
 
     return (
         <AppContext.Provider value={contextValue}>

@@ -28,6 +28,6 @@ export const DEFAULT_WORKFLOW: Workflow = {
 
 export const DEFAULT_USERS: User[] = [
     { id: generateId('user'), username: 'admin', password: '123', role: 'admin' },
-    { id: generateId('user'), username: 'sales', password: '123', role: 'sales' },
-    { id: generateId('user'), username: 'procurement', password: '123', role: 'procurement' },
+    { id: generateId('user'), username: 'sales', password: '123', role: 'admin' },
+    { id: generateId('user'), username: 'procurement', password: '123', role: 'admin' },
 ];
