@@ -5,6 +5,7 @@ import ConfirmationModal from '../shared/ConfirmationModal.tsx';
 import WorkflowEditor from '../settings/WorkflowEditor.tsx';
 import UserManagement from '../settings/UserManagement.tsx';
 import AppearanceSettings from '../settings/AppearanceSettings.tsx';
+import { migrateWorkflow, migrateOrder, migrateProduct, migrateProforma, migrateUser } from '../../utils/migrationUtils.ts';
 
 
 const BackupRestore: React.FC = () => {
@@ -59,13 +60,21 @@ const BackupRestore: React.FC = () => {
 
     const performRestore = () => {
         if (!restoreConfirm) return;
-        setWorkflows(restoreConfirm.workflows || []);
-        setOrders(restoreConfirm.orders || []);
-        setProducts(restoreConfirm.products || []);
-        setProformas(restoreConfirm.proformas || []);
-        setUsers(restoreConfirm.users || []);
+
+        // Safely migrate each data type, handling potentially missing arrays in the backup file
+        const restoredWorkflows = restoreConfirm.workflows?.map(migrateWorkflow) || [];
+        const restoredOrders = restoreConfirm.orders?.map(migrateOrder) || [];
+        const restoredProducts = restoreConfirm.products?.map(migrateProduct) || [];
+        const restoredProformas = restoreConfirm.proformas?.map(migrateProforma) || [];
+        const restoredUsers = restoreConfirm.users?.map(migrateUser) || [];
+        
+        setWorkflows(restoredWorkflows);
+        setOrders(restoredOrders);
+        setProducts(restoredProducts);
+        setProformas(restoredProformas);
+        setUsers(restoredUsers);
         setRestoreConfirm(null);
-        showNotification("اطلاعات با موفقیت بازیابی شد");
+        showNotification("اطلاعات با موفقیت بازیابی شد. داده‌ها برای سازگاری به‌روز شدند.");
     };
 
     return (
