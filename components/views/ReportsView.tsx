@@ -111,7 +111,18 @@ const ReportsView: React.FC = () => {
 
         const importsOverTime = Array.from(importsOverTimeMap.entries()).map(([date, amount]) => ({ date, "واردات": amount })).sort((a, b) => new Date(fromJalali(a.date)).getTime() - new Date(fromJalali(b.date)).getTime());
         const topProductsByWeight = Array.from(productSalesMap.values()).sort((a, b) => b.totalWeight - a.totalWeight).slice(0, 10);
-        const importsByManufacturer = Array.from(manufacturerImports.entries()).map(([name, amount]) => ({ name, value: amount }));
+        
+        const sortedManufacturers = Array.from(manufacturerImports.entries())
+            .map(([name, amount]) => ({ name, value: amount }))
+            .sort((a, b) => b.value - a.value);
+        
+        const topManufacturers = sortedManufacturers.slice(0, 5);
+        const otherValue = sortedManufacturers.slice(5).reduce((acc, curr) => acc + curr.value, 0);
+        const importsByManufacturer = [...topManufacturers];
+        if (otherValue > 0) {
+            importsByManufacturer.push({ name: 'سایر', value: otherValue });
+        }
+
         const stepDurations = Array.from(stepDurationsMap.entries()).map(([name, {totalDuration, count}]) => ({ name, "ساعت": parseFloat((totalDuration / count / (1000 * 60 * 60)).toFixed(2))}));
 
         return { totalOrders: filteredOrders.length, totalImports, uniqueCustomers: customerNames.size, importsOverTime, topProductsByWeight, importsByManufacturer, stepDurations };
@@ -124,6 +135,21 @@ const ReportsView: React.FC = () => {
     };
 
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF', '#FF4560'];
+    
+    const RADIAN = Math.PI / 180;
+    const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+        if (percent === 0) return null;
+        const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+        const x = cx + radius * Math.cos(-midAngle * RADIAN);
+        const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+        return (
+            <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" fontSize={12} fontWeight="bold">
+            {`${(percent * 100).toFixed(0)}%`}
+            </text>
+        );
+    };
+    
     const ChartTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
             return (
@@ -170,7 +196,8 @@ const ReportsView: React.FC = () => {
                     <ResponsiveContainer width="100%" height={300}>
                         <LineChart data={reportData.importsOverTime} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                            <XAxis dataKey="date" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
+                            {/* FIX: Removed interval="auto" as it is not a valid value for the interval prop on XAxis. Recharts will calculate the interval automatically. */}
+                            <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                             <YAxis tickFormatter={(value) => formatNumber(value)} tick={{ fontSize: 11 }} />
                             <Tooltip content={<ChartTooltip />} />
                             <Line type="monotone" dataKey="واردات" stroke="#3b82f6" strokeWidth={2.5} dot={{ r: 4 }} activeDot={{ r: 8 }} />
@@ -183,21 +210,37 @@ const ReportsView: React.FC = () => {
                         <h3 className="text-xl font-semibold mb-4 text-gray-800">واردات بر اساس تولیدکننده</h3>
                          <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
-                                <Pie data={reportData.importsByManufacturer} cx="50%" cy="50%" labelLine={false} outerRadius={100} fill="#8884d8" dataKey="value" nameKey="name">
+                                <Pie 
+                                    data={reportData.importsByManufacturer} 
+                                    cx="50%" 
+                                    cy="50%" 
+                                    labelLine={false} 
+                                    label={renderCustomizedLabel}
+                                    outerRadius={110} 
+                                    fill="#8884d8" 
+                                    dataKey="value" 
+                                    nameKey="name"
+                                >
                                     {reportData.importsByManufacturer.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                                 </Pie>
                                 <Tooltip formatter={(value: number) => [formatNumber(value), 'واردات']} />
-                                <Legend />
+                                <Legend wrapperStyle={{fontSize: "12px"}} />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
                      <div className="bg-white p-6 rounded-xl shadow-lg">
                          <h3 className="text-xl font-semibold mb-4 text-gray-800">کالاهای پر حجم (بر اساس وزن خالص Kg)</h3>
                          <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={reportData.topProductsByWeight} layout="vertical" margin={{ top: 5, right: 20, left: 60, bottom: 5 }}>
+                            <BarChart data={reportData.topProductsByWeight} layout="vertical" margin={{ top: 5, right: 20, left: 120, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                                 <XAxis type="number" tickFormatter={(value) => formatNumber(value)} />
-                                <YAxis type="category" dataKey="name" width={150} tick={{ fontSize: 12 }} />
+                                <YAxis 
+                                    type="category" 
+                                    dataKey="name" 
+                                    width={150} 
+                                    tick={{ fontSize: 12 }} 
+                                    tickFormatter={(value) => value.length > 20 ? `${value.substring(0, 18)}...` : value}
+                                />
                                 <Tooltip formatter={(value: number) => [formatNumber(value), 'Kg']} cursor={{fill: 'rgba(239, 246, 255, 0.7)'}} />
                                 <Bar dataKey="totalWeight" fill="#82ca9d" barSize={30} name="وزن کل" />
                             </BarChart>
@@ -208,9 +251,10 @@ const ReportsView: React.FC = () => {
                 <div className="bg-white p-6 rounded-xl shadow-lg">
                     <h3 className="text-xl font-semibold mb-4 text-gray-800">میانگین زمان بین مراحل فرآیند (ساعت)</h3>
                     <ResponsiveContainer width="100%" height={400}>
-                        <BarChart data={reportData.stepDurations} margin={{ top: 5, right: 20, left: -10, bottom: 120 }}>
+                        <BarChart data={reportData.stepDurations} margin={{ top: 5, right: 20, left: -10, bottom: 150 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                            <XAxis dataKey="name" angle={-45} textAnchor="end" interval={0} tick={{ fontSize: 11 }} />
+                            {/* FIX: Removed interval="auto" as it is not a valid value for the interval prop on XAxis. Recharts will calculate the interval automatically. */}
+                            <XAxis dataKey="name" angle={-45} textAnchor="end" tick={{ fontSize: 11 }} height={100} />
                             <YAxis />
                             <Tooltip formatter={(value: number) => [value, 'ساعت']} cursor={{fill: 'rgba(239, 246, 255, 0.7)'}} />
                             <Bar dataKey="ساعت" fill="#ffc658" barSize={50} radius={[4, 4, 0, 0]} />
