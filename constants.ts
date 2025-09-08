@@ -12,6 +12,7 @@ export const DEFAULT_WORKFLOW: Workflow = {
             fields: [
                 { id: generateId('field'), name: 'order_date', label: 'تاریخ ثبت', type: 'date', required: true, width: 'half' },
                 { id: generateId('field'), name: 'customer_name', label: 'نام مشتری', type: 'text', required: true, width: 'half' },
+                { id: generateId('field'), name: 'incoterms', label: 'اینکوترمز', type: 'select', required: true, width: 'half', options: ['EXW', 'FOB', 'CFR', 'CIF', 'DAP', 'DDP'] },
                 { id: generateId('field'), name: 'products_list', label: 'لیست کالاها', type: 'product', required: true, width: 'full' },
             ]
         },

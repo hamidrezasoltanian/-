@@ -1,7 +1,8 @@
 
+
 import React, { useContext, useMemo } from 'react';
 import { AppContext } from '../../contexts/AppContext.ts';
-import { Field, OrderProductItem } from '../../types.ts';
+import { Field, OrderProductItem, Product } from '../../types.ts';
 import { formatNumber } from '../../utils/formatters.ts';
 
 interface ProductSelectorFieldProps {
@@ -22,17 +23,25 @@ const ProductSelectorField: React.FC<ProductSelectorFieldProps> = ({ field, valu
         );
         onChange({ target: { name: field.name, value: newItems } });
     };
-
-    const handleProductToggle = (productId: string) => {
-        const isSelected = selectedItems.some(item => item.productId === productId);
-        let newItems;
-        if (isSelected) {
-            newItems = selectedItems.filter(item => item.productId !== productId);
-        } else {
-            newItems = [...selectedItems, { productId, quantity: 1 }];
-        }
+    
+    const handleRemoveItem = (productId: string) => {
+        const newItems = selectedItems.filter(item => item.productId !== productId);
         onChange({ target: { name: field.name, value: newItems } });
     };
+
+    const handleProductAdd = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const productId = e.target.value;
+        if (productId) {
+             const newItems = [...selectedItems, { productId, quantity: 1 }];
+             onChange({ target: { name: field.name, value: newItems } });
+             e.target.value = ""; // Reset select
+        }
+    };
+
+    const availableProducts = useMemo(() => {
+        const selectedIds = new Set(selectedItems.map(item => item.productId));
+        return products.filter(p => !selectedIds.has(p.id));
+    }, [products, selectedItems]);
 
     const grandTotal = useMemo(() => {
         return selectedItems.reduce((total, item) => {
@@ -49,21 +58,17 @@ const ProductSelectorField: React.FC<ProductSelectorFieldProps> = ({ field, valu
         <div className={`w-full border rounded-lg bg-white ${error ? 'border-red-500' : 'border-gray-200'} ${readOnly ? 'bg-gray-100' : ''}`}>
             {!readOnly && (
                 <div className="p-3 border-b">
-                    <h4 className="font-semibold text-gray-700">انتخاب کالاها</h4>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3 max-h-48 overflow-y-auto pr-2">
-                        {products.map(product => (
-                            <div key={product.id} className="flex items-center">
-                                <input
-                                    type="checkbox"
-                                    id={`${field.id}-${product.id}`}
-                                    checked={selectedItems.some(item => item.productId === product.id)}
-                                    onChange={() => handleProductToggle(product.id)}
-                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                />
-                                <label htmlFor={`${field.id}-${product.id}`} className="mr-2 text-sm text-gray-800 cursor-pointer">{product.name}</label>
-                            </div>
-                        ))}
-                    </div>
+                    <label htmlFor={`product-adder-${field.id}`} className="font-semibold text-gray-700 block mb-2">افزودن کالا</label>
+                     <select 
+                        id={`product-adder-${field.id}`}
+                        onChange={handleProductAdd} 
+                        disabled={readOnly}
+                        className="w-full p-2 border rounded-md bg-white focus:ring-2 focus:ring-blue-500"
+                        value=""
+                    >
+                        <option value="" disabled>-- یک کالا برای افزودن انتخاب کنید --</option>
+                        {availableProducts.map(p => <option key={p.id} value={p.id}>{p.name} ({p.code})</option>)}
+                    </select>
                 </div>
             )}
             <div className="p-3">
@@ -76,7 +81,7 @@ const ProductSelectorField: React.FC<ProductSelectorFieldProps> = ({ field, valu
                             const total = (Number(product.currencyPrice) || 0) * item.quantity;
                             return (
                                 <div key={item.productId} className="grid grid-cols-12 gap-2 items-center text-sm">
-                                    <span className="col-span-4">{product.name}</span>
+                                    <span className="col-span-4 font-medium">{product.name}</span>
                                     <input
                                         type="number"
                                         value={item.quantity}
@@ -86,7 +91,8 @@ const ProductSelectorField: React.FC<ProductSelectorFieldProps> = ({ field, valu
                                         min="1"
                                     />
                                     <span className="col-span-3 text-gray-600">{formatNumber(product.currencyPrice)} {product.currencyType}</span>
-                                    <span className="col-span-2 font-semibold text-gray-800">{formatNumber(total)}</span>
+                                    <span className="col-span-1 font-semibold text-gray-800">{formatNumber(total)}</span>
+                                    {!readOnly && <button type="button" onClick={() => handleRemoveItem(product.id)} className="col-span-1 text-red-500 hover:text-red-700 font-bold text-lg">×</button>}
                                 </div>
                             );
                         })}

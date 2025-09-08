@@ -170,7 +170,7 @@ const ReportsView: React.FC = () => {
                     <ResponsiveContainer width="100%" height={300}>
                         <LineChart data={reportData.importsOverTime} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                            <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                            <XAxis dataKey="date" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
                             <YAxis tickFormatter={(value) => formatNumber(value)} tick={{ fontSize: 11 }} />
                             <Tooltip content={<ChartTooltip />} />
                             <Line type="monotone" dataKey="واردات" stroke="#3b82f6" strokeWidth={2.5} dot={{ r: 4 }} activeDot={{ r: 8 }} />
@@ -183,20 +183,21 @@ const ReportsView: React.FC = () => {
                         <h3 className="text-xl font-semibold mb-4 text-gray-800">واردات بر اساس تولیدکننده</h3>
                          <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
-                                <Pie data={reportData.importsByManufacturer} cx="50%" cy="50%" labelLine={false} outerRadius={110} fill="#8884d8" dataKey="value" nameKey="name" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                                <Pie data={reportData.importsByManufacturer} cx="50%" cy="50%" labelLine={false} outerRadius={100} fill="#8884d8" dataKey="value" nameKey="name">
                                     {reportData.importsByManufacturer.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                                 </Pie>
                                 <Tooltip formatter={(value: number) => [formatNumber(value), 'واردات']} />
+                                <Legend />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
                      <div className="bg-white p-6 rounded-xl shadow-lg">
                          <h3 className="text-xl font-semibold mb-4 text-gray-800">کالاهای پر حجم (بر اساس وزن خالص Kg)</h3>
                          <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={reportData.topProductsByWeight} layout="vertical" margin={{ top: 5, right: 20, left: 50, bottom: 5 }}>
+                            <BarChart data={reportData.topProductsByWeight} layout="vertical" margin={{ top: 5, right: 20, left: 60, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                                 <XAxis type="number" tickFormatter={(value) => formatNumber(value)} />
-                                <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 12 }} />
+                                <YAxis type="category" dataKey="name" width={150} tick={{ fontSize: 12 }} />
                                 <Tooltip formatter={(value: number) => [formatNumber(value), 'Kg']} cursor={{fill: 'rgba(239, 246, 255, 0.7)'}} />
                                 <Bar dataKey="totalWeight" fill="#82ca9d" barSize={30} name="وزن کل" />
                             </BarChart>
@@ -206,8 +207,8 @@ const ReportsView: React.FC = () => {
                 
                 <div className="bg-white p-6 rounded-xl shadow-lg">
                     <h3 className="text-xl font-semibold mb-4 text-gray-800">میانگین زمان بین مراحل فرآیند (ساعت)</h3>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={reportData.stepDurations} margin={{ top: 5, right: 20, left: -10, bottom: 60 }}>
+                    <ResponsiveContainer width="100%" height={400}>
+                        <BarChart data={reportData.stepDurations} margin={{ top: 5, right: 20, left: -10, bottom: 120 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
                             <XAxis dataKey="name" angle={-45} textAnchor="end" interval={0} tick={{ fontSize: 11 }} />
                             <YAxis />

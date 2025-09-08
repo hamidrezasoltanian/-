@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import Modal from './Modal.tsx';
 
@@ -7,9 +8,18 @@ interface ConfirmationModalProps {
   onConfirm: () => void;
   onCancel: () => void;
   show: boolean;
+  confirmText?: string;
+  confirmButtonClass?: string;
 }
 
-const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ message, onConfirm, onCancel, show }) => {
+const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ 
+    message, 
+    onConfirm, 
+    onCancel, 
+    show, 
+    confirmText = 'تایید', 
+    confirmButtonClass = 'bg-red-500 hover:bg-red-600' 
+}) => {
   return (
     <Modal show={show} onClose={onCancel} maxWidth="max-w-md">
         <div className="text-center">
@@ -24,9 +34,9 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ message, onConfir
                 </button>
                 <button 
                     onClick={onConfirm} 
-                    className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+                    className={`w-full text-white font-bold py-3 px-6 rounded-lg transition-colors ${confirmButtonClass}`}
                 >
-                    تایید
+                    {confirmText}
                 </button>
             </div>
         </div>

@@ -3,6 +3,8 @@ import { AppContext } from '../../contexts/AppContext.ts';
 import { Order } from '../../types.ts';
 import StepForm from './StepForm.tsx';
 import ConfirmationModal from '../shared/ConfirmationModal.tsx';
+import Modal from '../shared/Modal.tsx';
+import OrderSummary from './OrderSummary.tsx';
 
 interface OrderDetailProps {
     order: Order;
@@ -19,8 +21,11 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onUpdate, onDelete, re
     const [activeStepIndex, setActiveStepIndex] = useState(0);
     const [orderTitle, setOrderTitle] = useState(order.title || '');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [showFinalizeConfirm, setShowFinalizeConfirm] = useState(false);
+    const [showSummary, setShowSummary] = useState(false);
 
     const workflow = workflows.find(wf => wf.id === order.workflowId);
+    const isFinalized = !!order.is_finalized;
 
     useEffect(() => {
         setOrderTitle(order.title);
@@ -49,6 +54,13 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onUpdate, onDelete, re
         }
     };
 
+    const handleFinalize = () => {
+        onUpdate({ ...order, is_finalized: true });
+        setShowFinalizeConfirm(false);
+        showNotification("سفارش نهایی و بایگانی شد.");
+        logActivity('UPDATE', 'Order', `سفارش '${order.title}' را نهایی کرد.`, order.id);
+    };
+
     const isStepCompleted = (stepId: string) => {
         return !!order.steps_data?.[stepId]?.completed_at;
     };
@@ -58,17 +70,25 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onUpdate, onDelete, re
 
     return (
         <div className="space-y-8">
-            <div className="flex justify-between items-center gap-4 flex-wrap">
-                <input 
-                    type="text" 
-                    value={orderTitle} 
-                    onChange={e => setOrderTitle(e.target.value)} 
-                    onBlur={handleSaveTitle}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSaveTitle()}
-                    disabled={readOnly}
-                    className="text-2xl font-bold flex-grow p-2 rounded-md bg-transparent hover:bg-gray-100 focus:bg-white focus:ring-2 focus:ring-blue-400 transition-all disabled:bg-transparent disabled:cursor-not-allowed"
-                />
-                {!readOnly && <button onClick={() => setShowDeleteConfirm(true)} className="bg-red-100 hover:bg-red-200 text-red-700 font-bold py-2 px-4 rounded-lg transition-colors">حذف سفارش</button>}
+            <div className="flex justify-between items-start gap-4 flex-wrap">
+                <div className="flex-grow">
+                     <input 
+                        type="text" 
+                        value={orderTitle} 
+                        onChange={e => setOrderTitle(e.target.value)} 
+                        onBlur={handleSaveTitle}
+                        onKeyDown={(e) => e.key === 'Enter' && handleSaveTitle()}
+                        disabled={readOnly || isFinalized}
+                        className="text-2xl font-bold flex-grow p-2 rounded-md bg-transparent hover:bg-gray-100 focus:bg-white focus:ring-2 focus:ring-blue-400 transition-all w-full disabled:bg-transparent disabled:cursor-not-allowed"
+                    />
+                     {isFinalized && <p className="text-sm text-green-600 font-semibold mt-1">این سفارش نهایی شده و قابل ویرایش نیست.</p>}
+                </div>
+               
+                <div className="flex items-center gap-2 flex-wrap">
+                    {!isFinalized && !readOnly && <button onClick={() => setShowFinalizeConfirm(true)} className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">ذخیره نهایی</button>}
+                    <button onClick={() => setShowSummary(true)} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">خلاصه عملیات</button>
+                    {!readOnly && !isFinalized && <button onClick={() => setShowDeleteConfirm(true)} className="bg-red-100 hover:bg-red-200 text-red-700 font-bold py-2 px-4 rounded-lg transition-colors">حذف سفارش</button>}
+                </div>
             </div>
             <div className="bg-white rounded-xl shadow-lg">
                 <nav className="border-b border-gray-200 flex overflow-x-auto">
@@ -89,10 +109,24 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onUpdate, onDelete, re
                         order={order} 
                         workflowStep={activeStep}
                         onStepDataChange={handleStepDataChange} 
-                        readOnly={readOnly}
+                        readOnly={readOnly || isFinalized}
                     />
                 </div>
             </div>
+
+            <Modal show={showSummary} onClose={() => setShowSummary(false)} maxWidth="max-w-4xl">
+                 {showSummary && <OrderSummary order={order} onClose={() => setShowSummary(false)} />}
+            </Modal>
+
+            <ConfirmationModal 
+                show={showFinalizeConfirm}
+                message="آیا از نهایی کردن سفارش مطمئن هستید؟ پس از این مرحله، سفارش دیگر قابل ویرایش نخواهد بود."
+                confirmText="نهایی کردن"
+                confirmButtonClass="bg-blue-600 hover:bg-blue-700"
+                onConfirm={handleFinalize}
+                onCancel={() => setShowFinalizeConfirm(false)}
+            />
+
             <ConfirmationModal 
                 show={showDeleteConfirm}
                 message="آیا از حذف این سفارش مطمئن هستید؟ این عمل غیرقابل بازگشت است."

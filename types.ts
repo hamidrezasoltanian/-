@@ -45,6 +45,7 @@ export interface Order {
       completed_at?: string; // ISO date string
     };
   };
+  is_finalized?: boolean;
 }
 
 export interface Product {
