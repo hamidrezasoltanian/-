@@ -1,25 +1,18 @@
-
+// This file was renamed to ProformaView.jsx to fix MIME type issues on static hosting.
 import React, { useState, useContext, useMemo, useEffect, useRef } from 'react';
-import { AppContext } from '../../contexts/AppContext.ts';
-import { Proforma, ProformaItem, Product } from '../../types.ts';
-import { generateId } from '../../utils/idUtils.ts';
-import { formatNumber } from '../../utils/formatters.ts';
-import { toJalali } from '../../utils/dateUtils.ts';
-import ConfirmationModal from '../shared/ConfirmationModal.tsx';
-import { useDebounce } from '../../hooks/useDebounce.ts';
+import { AppContext } from '../../contexts/AppContext.js';
+import { generateId } from '../../utils/idUtils.js';
+import { formatNumber } from '../../utils/formatters.js';
+import { toJalali } from '../../utils/dateUtils.js';
+import ConfirmationModal from '../shared/ConfirmationModal.jsx';
+import { useDebounce } from '../../hooks/useDebounce.js';
 
 // ProformaEditor component (form for create/edit)
-interface ProformaEditorProps {
-    initialProforma: Proforma | null;
-    onSave: (data: Omit<Proforma, 'id' | 'date'> & { id?: string }) => void;
-    onCancel: () => void;
-}
-
-const ProformaEditor: React.FC<ProformaEditorProps> = ({ initialProforma, onSave, onCancel }) => {
-    const { products, showNotification } = useContext(AppContext)!;
+const ProformaEditor = ({ initialProforma, onSave, onCancel }) => {
+    const { products, showNotification } = useContext(AppContext);
     const [companyName, setCompanyName] = useState('');
-    const [proformaItems, setProformaItems] = useState<ProformaItem[]>([]);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [proformaItems, setProformaItems] = useState([]);
+    const fileInputRef = useRef(null);
 
     useEffect(() => {
         if (initialProforma) {
@@ -31,7 +24,7 @@ const ProformaEditor: React.FC<ProformaEditorProps> = ({ initialProforma, onSave
         }
     }, [initialProforma]);
 
-    const handleProductSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const handleProductSelect = (e) => {
         const productId = e.target.value;
         if (productId && !proformaItems.some(item => item.productId === productId)) {
             const product = products.find(p => p.id === productId);
@@ -42,7 +35,7 @@ const ProformaEditor: React.FC<ProformaEditorProps> = ({ initialProforma, onSave
         e.target.value = ""; // Reset select
     };
     
-    const addOrUpdateItem = (product: Product, quantity: number) => {
+    const addOrUpdateItem = (product, quantity) => {
         setProformaItems(prev => {
             const existingItem = prev.find(item => item.productId === product.id);
             if(existingItem) {
@@ -62,13 +55,13 @@ const ProformaEditor: React.FC<ProformaEditorProps> = ({ initialProforma, onSave
         });
     };
 
-    const handleItemChange = (productId: string, field: keyof ProformaItem, value: string | number) => {
+    const handleItemChange = (productId, field, value) => {
         setProformaItems(prev => prev.map(item =>
             item.productId === productId ? { ...item, [field]: value } : item
         ));
     };
 
-    const handleRemoveItem = (productId: string) => {
+    const handleRemoveItem = (productId) => {
         setProformaItems(prev => prev.filter(item => item.productId !== productId));
     };
 
@@ -119,14 +112,19 @@ const ProformaEditor: React.FC<ProformaEditorProps> = ({ initialProforma, onSave
         document.body.removeChild(link);
     };
 
-    const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileImport = (event) => {
         const file = event.target.files?.[0];
         if (!file) return;
 
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
-                const text = e.target?.result as string;
+                // @FIX: Ensure file content is a string before calling .split().
+                const text = e.target?.result;
+                if (typeof text !== 'string') {
+                    showNotification("خطا در خواندن محتوای فایل", "error");
+                    return;
+                }
                 const lines = text.split('\n').filter(line => line.trim() !== '');
                 if (lines.length < 2) {
                     showNotification("فایل خالی یا نامعتبر است", "error"); return;
@@ -136,7 +134,7 @@ const ProformaEditor: React.FC<ProformaEditorProps> = ({ initialProforma, onSave
                     showNotification("فایل باید شامل ستون‌های product_code و quantity باشد", "error"); return;
                 }
                 let itemsAdded = 0;
-                let errors: string[] = [];
+                let errors = [];
                 lines.slice(1).forEach((line, index) => {
                     const [code, quantityStr] = line.trim().split(',');
                     const product = products.find(p => p.code === code.trim());
@@ -222,14 +220,14 @@ const ProformaEditor: React.FC<ProformaEditorProps> = ({ initialProforma, onSave
 
 
 // ProformaView main component
-const ProformaView: React.FC = () => {
+const ProformaView = () => {
     const context = useContext(AppContext);
     if (!context) throw new Error("AppContext not found");
     const { proformas, setProformas, showNotification, logActivity } = context;
 
-    const [viewMode, setViewMode] = useState<'list' | 'create'>('list');
-    const [selectedProforma, setSelectedProforma] = useState<Proforma | null>(null);
-    const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+    const [viewMode, setViewMode] = useState('list');
+    const [selectedProforma, setSelectedProforma] = useState(null);
+    const [deleteConfirmId, setDeleteConfirmId] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
@@ -238,12 +236,12 @@ const ProformaView: React.FC = () => {
         setViewMode('create');
     };
 
-    const handleEdit = (proforma: Proforma) => {
+    const handleEdit = (proforma) => {
         setSelectedProforma(proforma);
         setViewMode('create');
     };
 
-    const handleDeleteRequest = (id: string) => {
+    const handleDeleteRequest = (id) => {
         setDeleteConfirmId(id);
     };
 
@@ -258,13 +256,13 @@ const ProformaView: React.FC = () => {
         }
     };
 
-    const handleSave = (data: Omit<Proforma, 'id' | 'date'> & { id?: string }) => {
+    const handleSave = (data) => {
         if (data.id) { // Update
             setProformas(prev => prev.map(p => p.id === data.id ? { ...p, companyName: data.companyName, items: data.items, total: data.total } : p));
             showNotification('پیش‌فاکتور با موفقیت به‌روزرسانی شد');
             logActivity('UPDATE', 'Proforma', `پیش‌فاکتور برای شرکت '${data.companyName}' را به‌روزرسانی کرد.`, data.id);
         } else { // Create
-            const newProforma: Proforma = {
+            const newProforma = {
                 ...data,
                 id: generateId('prof'),
                 date: new Date().toISOString(),
@@ -277,7 +275,7 @@ const ProformaView: React.FC = () => {
         setSelectedProforma(null);
     };
 
-    const handleExport = (proforma: Proforma) => {
+    const handleExport = (proforma) => {
         let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // UTF-8 BOM
         csvContent += "نام کالا,کد کالا,کد IRC,وزن خالص,وزن ناخالص,تعداد,قیمت واحد,جمع کل\n";
         proforma.items.forEach(item => {

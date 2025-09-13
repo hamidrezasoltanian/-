@@ -1,7 +1,5 @@
-
+// This file was renamed to Sidebar.jsx to fix MIME type issues on static hosting.
 import React from 'react';
-import { View } from '../../contexts/AppContext.ts';
-import { User } from '../../types.ts';
 import {
     HomeIcon,
     ClipboardListIcon,
@@ -12,19 +10,9 @@ import {
     Cog6ToothIcon,
     ArrowRightOnRectangleIcon,
     Bars3Icon
-} from '../shared/Icons.tsx';
+} from '../shared/Icons.jsx';
 
-interface SidebarProps {
-    activeView: View;
-    setActiveView: (view: View) => void;
-    logout: () => void;
-    currentUser: User;
-    isCollapsed: boolean;
-    setIsCollapsed: (isCollapsed: boolean) => void;
-    tabs: { key: View; label: string }[];
-}
-
-const iconMap: Record<View, React.ElementType> = {
+const iconMap = {
     home: HomeIcon,
     workflow: ClipboardListIcon,
     products: BoxIcon,
@@ -34,9 +22,9 @@ const iconMap: Record<View, React.ElementType> = {
     settings: Cog6ToothIcon,
 };
 
-const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, logout, currentUser, isCollapsed, setIsCollapsed, tabs }) => {
+const Sidebar = ({ activeView, setActiveView, logout, currentUser, isCollapsed, setIsCollapsed, tabs }) => {
     
-    const SidebarLink: React.FC<{ tab: { key: View, label: string } }> = ({ tab }) => {
+    const SidebarLink = ({ tab }) => {
         const Icon = iconMap[tab.key];
         const isActive = activeView === tab.key;
         return (
@@ -68,7 +56,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, logout, cu
             
             <nav className="flex-grow px-4 py-4">
                 {tabs.map(tab => (
-                    <SidebarLink key={tab.key} tab={tab as { key: View; label:string }} />
+                    <SidebarLink key={tab.key} tab={tab} />
                 ))}
             </nav>
 

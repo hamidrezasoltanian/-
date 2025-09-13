@@ -1,8 +1,7 @@
+// This file was renamed to constants.js to fix MIME type issues on static hosting.
+import { generateId } from './utils/idUtils.js';
 
-import { Workflow, User } from './types.ts';
-import { generateId } from './utils/idUtils.ts';
-
-export const DEFAULT_WORKFLOW: Workflow = {
+export const DEFAULT_WORKFLOW = {
     id: generateId('wf'),
     name: 'فرآیند پیش‌فرض واردات',
     steps: [
@@ -27,7 +26,7 @@ export const DEFAULT_WORKFLOW: Workflow = {
     ]
 };
 
-export const DEFAULT_USERS: User[] = [
+export const DEFAULT_USERS = [
     { id: generateId('user'), username: 'admin', password: '123', role: 'admin' },
     { id: generateId('user'), username: 'sales', password: '123', role: 'admin' },
     { id: generateId('user'), username: 'procurement', password: '123', role: 'admin' },

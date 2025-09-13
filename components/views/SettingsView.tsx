@@ -1,20 +1,21 @@
+// This file was renamed to SettingsView.jsx to fix MIME type issues on static hosting.
 import React, { useState, useContext, useRef } from 'react';
-import { AppContext } from '../../contexts/AppContext.ts';
-import { generateId } from '../../utils/idUtils.ts';
-import ConfirmationModal from '../shared/ConfirmationModal.tsx';
-import WorkflowEditor from '../settings/WorkflowEditor.tsx';
-import UserManagement from '../settings/UserManagement.tsx';
-import AppearanceSettings from '../settings/AppearanceSettings.tsx';
-import { migrateWorkflow, migrateOrder, migrateProduct, migrateProforma, migrateUser } from '../../utils/migrationUtils.ts';
+import { AppContext } from '../../contexts/AppContext.js';
+import { generateId } from '../../utils/idUtils.js';
+import ConfirmationModal from '../shared/ConfirmationModal.jsx';
+import WorkflowEditor from '../settings/WorkflowEditor.jsx';
+import UserManagement from '../settings/UserManagement.jsx';
+import AppearanceSettings from '../settings/AppearanceSettings.jsx';
+import { migrateWorkflow, migrateOrder, migrateProduct, migrateProforma, migrateUser } from '../../utils/migrationUtils.js';
 
 
-const BackupRestore: React.FC = () => {
+const BackupRestore = () => {
     const context = useContext(AppContext);
     if (!context) throw new Error("AppContext not found");
     const { workflows, orders, products, proformas, users, setWorkflows, setOrders, setProducts, setProformas, setUsers, showNotification } = context;
 
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const [restoreConfirm, setRestoreConfirm] = useState<any | null>(null);
+    const fileInputRef = useRef(null);
+    const [restoreConfirm, setRestoreConfirm] = useState(null);
 
     const handleBackup = () => {
         const backupData = {
@@ -38,17 +39,23 @@ const BackupRestore: React.FC = () => {
         showNotification("فایل پشتیبان با موفقیت دانلود شد");
     };
 
-    const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileSelect = (event) => {
         const file = event.target.files?.[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
-                const data = JSON.parse(e.target?.result as string);
-                if (data.workflows && data.orders && data.products) {
-                    setRestoreConfirm(data);
+                // @FIX: Ensure file reader result is a string before parsing.
+                const result = e.target?.result;
+                if (typeof result === 'string') {
+                    const data = JSON.parse(result);
+                    if (data.workflows && data.orders && data.products) {
+                        setRestoreConfirm(data);
+                    } else {
+                        showNotification("فایل پشتیبان معتبر نیست", "error");
+                    }
                 } else {
-                    showNotification("فایل پشتیبان معتبر نیست", "error");
+                    showNotification("خطا در خواندن فایل پشتیبان", "error");
                 }
             } catch (err) {
                 showNotification("خطا در خواندن فایل پشتیبان", "error");
@@ -96,14 +103,14 @@ const BackupRestore: React.FC = () => {
     );
 };
 
-const WorkflowSettings: React.FC = () => {
+const WorkflowSettings = () => {
     const context = useContext(AppContext);
     if (!context) throw new Error("AppContext not found");
     const { workflows, setWorkflows, showNotification, logActivity } = context;
     
-    const [selectedWorkflowId, setSelectedWorkflowId] = useState<string | null>(null);
+    const [selectedWorkflowId, setSelectedWorkflowId] = useState(null);
     const [newWorkflowName, setNewWorkflowName] = useState("");
-    const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+    const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
     const handleAddWorkflow = () => {
         if (!newWorkflowName.trim()) {
@@ -171,7 +178,7 @@ const WorkflowSettings: React.FC = () => {
     );
 };
 
-const SettingsView: React.FC = () => {
+const SettingsView = () => {
     const [activeTab, setActiveTab] = useState('workflows');
     
     return (

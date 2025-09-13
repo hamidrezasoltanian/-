@@ -1,15 +1,8 @@
-
+// This file was renamed to FieldEditor.jsx to fix MIME type issues on static hosting.
 import React from 'react';
-import { Field } from '../../types.ts';
 
-interface FieldEditorProps {
-    field: Field;
-    onUpdate: (field: Field) => void;
-    onDelete: () => void;
-}
-
-const FieldEditor: React.FC<FieldEditorProps> = ({ field, onUpdate, onDelete }) => {
-    const handleChange = <K extends keyof Field,>(key: K, value: Field[K]) => {
+const FieldEditor = ({ field, onUpdate, onDelete }) => {
+    const handleChange = (key, value) => {
         onUpdate({ ...field, [key]: value });
     };
 
@@ -20,7 +13,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ field, onUpdate, onDelete }) 
                     <input value={field.label} onChange={e => handleChange('label', e.target.value)} placeholder="عنوان فیلد" className="w-full p-2 border rounded-md"/>
                 </div>
                 <div className="col-span-6 md:col-span-2">
-                    <select value={field.type} onChange={e => handleChange('type', e.target.value as Field['type'])} className="w-full p-2 border rounded-md bg-white">
+                    <select value={field.type} onChange={e => handleChange('type', e.target.value)} className="w-full p-2 border rounded-md bg-white">
                         <option value="text">متن</option>
                         <option value="number">عدد</option>
                         <option value="date">تاریخ</option>
@@ -31,7 +24,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ field, onUpdate, onDelete }) 
                     </select>
                 </div>
                 <div className="col-span-6 md:col-span-2">
-                    <select value={field.width || 'half'} onChange={e => handleChange('width', e.target.value as Field['width'])} className="w-full p-2 border rounded-md bg-white">
+                    <select value={field.width || 'half'} onChange={e => handleChange('width', e.target.value)} className="w-full p-2 border rounded-md bg-white">
                         <option value="half">نیم عرض</option>
                         <option value="full">تمام عرض</option>
                     </select>

@@ -1,12 +1,12 @@
-
+// This file was renamed to HomeView.jsx to fix MIME type issues on static hosting.
 import React, { useContext, useMemo } from 'react';
-import { AppContext } from '../../contexts/AppContext.ts';
-import { formatNumber } from '../../utils/formatters.ts';
-import { toJalali } from '../../utils/dateUtils.ts';
-import { calculateOrderProgress } from '../../utils/orderUtils.ts';
-import { ClipboardListIcon, BoxIcon, DocumentTextIcon, PlusCircleIcon } from '../shared/Icons.tsx';
+import { AppContext } from '../../contexts/AppContext.js';
+import { formatNumber } from '../../utils/formatters.js';
+import { toJalali } from '../../utils/dateUtils.js';
+import { calculateOrderProgress } from '../../utils/orderUtils.js';
+import { ClipboardListIcon, BoxIcon, DocumentTextIcon, PlusCircleIcon } from '../shared/Icons.jsx';
 
-const StatCard: React.FC<{ title: string; value: string | number; icon: React.ReactNode; color: string; onClick: () => void; }> = ({ title, value, icon, color, onClick }) => (
+const StatCard = ({ title, value, icon, color, onClick }) => (
     <button onClick={onClick} className="soft-shadow bg-white p-6 flex items-center gap-4 text-right w-full transition-all hover:scale-[1.03]">
         <div className={`p-3 rounded-full ${color}`}>
             {icon}
@@ -19,14 +19,14 @@ const StatCard: React.FC<{ title: string; value: string | number; icon: React.Re
 );
 
 
-const QuickAction: React.FC<{ label: string; onClick: () => void }> = ({ label, onClick }) => (
+const QuickAction = ({ label, onClick }) => (
     <button onClick={onClick} className="flex items-center gap-3 p-3 text-gray-700 font-semibold hover:bg-slate-200 rounded-lg transition-colors w-full text-right">
         <PlusCircleIcon className="w-6 h-6 text-blue-500" />
         <span>{label}</span>
     </button>
 );
 
-const HomeView: React.FC = () => {
+const HomeView = () => {
     const context = useContext(AppContext);
     if (!context) throw new Error("AppContext not found");
     const { orders, products, proformas, setActiveView, setSelectedOrderId, workflows } = context;
@@ -35,7 +35,7 @@ const HomeView: React.FC = () => {
         [...orders].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()), 
     [orders]);
 
-    const handleViewOrder = (orderId: string) => {
+    const handleViewOrder = (orderId) => {
         setSelectedOrderId(orderId);
         setActiveView('workflow');
     };

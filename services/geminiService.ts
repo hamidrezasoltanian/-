@@ -1,12 +1,12 @@
-import { GoogleGenAI, GenerateContentResponse, Type } from "@google/genai";
-import { Product, Order, Workflow, Proforma, ChatMessage } from "../types.ts";
+// This file was renamed to geminiService.js to fix MIME type issues on static hosting.
+import { GoogleGenAI } from "@google/genai";
 
 // The API key is expected to be populated into process.env by the execution environment.
 const API_KEY = process.env.API_KEY;
 
-let ai: GoogleGenAI | null = null;
+let ai = null;
 
-function getAiInstance(): GoogleGenAI | null {
+function getAiInstance() {
     // Add a guard to prevent crashes if executed in a non-browser environment (e.g., SSR)
     if (typeof window === 'undefined') {
         return null;
@@ -25,11 +25,11 @@ function getAiInstance(): GoogleGenAI | null {
     return null;
 }
 
-export const isAiAvailable = (): boolean => {
+export const isAiAvailable = () => {
     return !!API_KEY;
 };
 
-export const generateProductDescription = async (product: Partial<Product>): Promise<string> => {
+export const generateProductDescription = async (product) => {
     const aiInstance = getAiInstance();
     if (!aiInstance) {
         return "سرویس هوش مصنوعی پیکربندی نشده است.";
@@ -60,7 +60,7 @@ export const generateProductDescription = async (product: Partial<Product>): Pro
     }
 };
 
-export const analyzeReportData = async (reportData: any): Promise<string> => {
+export const analyzeReportData = async (reportData) => {
     const aiInstance = getAiInstance();
     if (!aiInstance) {
         return "سرویس هوش مصنوعی پیکربندی نشده است.";
@@ -103,9 +103,9 @@ The response should be well-structured, easy to read, and directly address the u
 
 
 export const chatWithAssistant = async (
-    message: string,
-    context: { orders: Order[], products: Product[], workflows: Workflow[], proformas: Proforma[] }
-): Promise<Partial<ChatMessage>> => {
+    message,
+    context
+) => {
     const aiInstance = getAiInstance();
     if (!aiInstance) {
         return { text: "سرویس هوش مصنوعی پیکربندی نشده است." };

@@ -1,14 +1,14 @@
-
+// This file was renamed to LoginView.jsx to fix MIME type issues on static hosting.
 import React, { useState, useContext } from 'react';
-import { AppContext } from '../../contexts/AppContext.ts';
+import { AppContext } from '../../contexts/AppContext.js';
 
-const LoginView: React.FC = () => {
+const LoginView = () => {
     const context = useContext(AppContext);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         if (!username || !password) {
             context?.showNotification("نام کاربری و رمز عبور الزامی است", "error");

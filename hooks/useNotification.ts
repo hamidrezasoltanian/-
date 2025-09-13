@@ -1,16 +1,10 @@
-
+// This file was renamed to useNotification.js to fix MIME type issues on static hosting.
 import React, { useState, useCallback } from 'react';
 
-interface NotificationState {
-  message: string;
-  type: 'success' | 'error';
-  visible: boolean;
-}
-
 export const useNotification = () => {
-  const [notification, setNotification] = useState<NotificationState>({ message: '', type: 'success', visible: false });
+  const [notification, setNotification] = useState({ message: '', type: 'success', visible: false });
 
-  const showNotification = useCallback((message: string, type: 'success' | 'error' = 'success') => {
+  const showNotification = useCallback((message, type = 'success') => {
     setNotification({ message, type, visible: true });
     setTimeout(() => {
       setNotification(prev => ({ ...prev, visible: false }));

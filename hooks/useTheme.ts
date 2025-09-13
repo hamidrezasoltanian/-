@@ -1,11 +1,10 @@
+// This file was renamed to useTheme.js to fix MIME type issues on static hosting.
 import { useEffect } from 'react';
-import { useLocalStorage } from './useLocalStorage.ts';
-
-export type Theme = 'blue' | 'green' | 'indigo' | 'red' | 'dark';
+import { useLocalStorage } from './useLocalStorage.js';
 
 export const useTheme = () => {
-    const [theme, setTheme] = useLocalStorage<Theme>('app_theme_v1', 'blue');
-    const [backgroundImage, setBackgroundImage] = useLocalStorage<string | null>('app_background_v1', null);
+    const [theme, setTheme] = useLocalStorage('app_theme_v1', 'blue');
+    const [backgroundImage, setBackgroundImage] = useLocalStorage('app_background_v1', null);
 
     useEffect(() => {
         const root = document.documentElement;
@@ -19,7 +18,7 @@ export const useTheme = () => {
 
     useEffect(() => {
         const styleId = 'dynamic-background-style';
-        let styleTag = document.getElementById(styleId) as HTMLStyleElement | null;
+        let styleTag = document.getElementById(styleId);
         if (!styleTag) {
             styleTag = document.createElement('style');
             styleTag.id = styleId;

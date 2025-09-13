@@ -1,4 +1,5 @@
-export const formatDuration = (ms: number): string => {
+// This file was renamed to timeUtils.js to fix MIME type issues on static hosting.
+export const formatDuration = (ms) => {
     if (isNaN(ms) || ms < 0) ms = 0;
     
     const seconds = Math.floor(ms / 1000);

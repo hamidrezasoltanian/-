@@ -1,20 +1,13 @@
-
-
+// This file was renamed to KamaDatePicker.jsx to fix MIME type issues on static hosting.
 import React, { useEffect, useMemo, useRef } from 'react';
-import { fromJalali, toJalali } from '../../utils/dateUtils.ts';
-import { generateId } from '../../utils/idUtils.ts';
-import { CalendarIcon } from './Icons.tsx';
+import { fromJalali, toJalali } from '../../utils/dateUtils.js';
+import { generateId } from '../../utils/idUtils.js';
+import { CalendarIcon } from './Icons.jsx';
 
+// @FIX: Declare kamaDatepicker as a global variable to resolve TypeScript error.
 declare const kamaDatepicker: any;
 
-interface KamaDatePickerProps {
-    value: string;
-    onChange: (e: { target: { name: string; value: string } }) => void;
-    name: string;
-    error?: boolean;
-}
-
-const KamaDatePicker: React.FC<KamaDatePickerProps> = ({ value, onChange, name, error }) => {
+const KamaDatePicker = ({ value, onChange, name, error }) => {
     const inputId = useMemo(() => `datepicker-${name}-${generateId()}`, [name]);
     const onChangeRef = useRef(onChange);
 
@@ -36,7 +29,8 @@ const KamaDatePicker: React.FC<KamaDatePickerProps> = ({ value, onChange, name, 
             markToday: true,
             gotoToday: true,
             onclose: () => {
-                const inputElement = document.getElementById(inputId) as HTMLInputElement;
+                // @FIX: Cast element to HTMLInputElement to access 'value' property.
+                const inputElement = document.getElementById(inputId) as HTMLInputElement | null;
                 if (inputElement && inputElement.value) {
                     const isoDate = fromJalali(inputElement.value);
                     if (isoDate && isoDate !== value) {
@@ -65,7 +59,8 @@ const KamaDatePicker: React.FC<KamaDatePickerProps> = ({ value, onChange, name, 
     }, [inputId, name]);
 
     useEffect(() => {
-        const inputElement = document.getElementById(inputId) as HTMLInputElement;
+        // @FIX: Cast element to HTMLInputElement to access 'value' property.
+        const inputElement = document.getElementById(inputId) as HTMLInputElement | null;
         if (inputElement) {
             const jalaliDate = toJalali(value);
             if (inputElement.value !== jalaliDate) {
@@ -74,7 +69,7 @@ const KamaDatePicker: React.FC<KamaDatePickerProps> = ({ value, onChange, name, 
         }
     }, [value, inputId]);
 
-    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const handleBlur = (e) => {
         const manualValue = e.target.value;
         const currentValueInJalali = toJalali(value);
         

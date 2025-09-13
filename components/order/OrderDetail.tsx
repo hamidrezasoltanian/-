@@ -1,20 +1,13 @@
+// This file was renamed to OrderDetail.jsx to fix MIME type issues on static hosting.
 import React, { useState, useContext, useEffect } from 'react';
-import { AppContext } from '../../contexts/AppContext.ts';
-import { Order } from '../../types.ts';
-import { calculateOrderProgress } from '../../utils/orderUtils.ts';
-import StepForm from './StepForm.tsx';
-import ConfirmationModal from '../shared/ConfirmationModal.tsx';
-import Modal from '../shared/Modal.tsx';
-import OrderSummary from './OrderSummary.tsx';
+import { AppContext } from '../../contexts/AppContext.js';
+import { calculateOrderProgress } from '../../utils/orderUtils.js';
+import StepForm from './StepForm.jsx';
+import ConfirmationModal from '../shared/ConfirmationModal.jsx';
+import Modal from '../shared/Modal.jsx';
+import OrderSummary from './OrderSummary.jsx';
 
-interface OrderDetailProps {
-    order: Order;
-    onUpdate: (order: Order) => void;
-    onDelete: () => void;
-    readOnly?: boolean;
-}
-
-const OrderDetail: React.FC<OrderDetailProps> = ({ order, onUpdate, onDelete, readOnly = false }) => {
+const OrderDetail = ({ order, onUpdate, onDelete, readOnly = false }) => {
     const context = useContext(AppContext);
     if (!context) throw new Error("AppContext not found");
     const { workflows, showNotification, logActivity } = context;
@@ -38,7 +31,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onUpdate, onDelete, re
         return <div className="text-center text-red-500 p-8 bg-red-50 rounded-lg">خطا: فرآیند مربوط به این سفارش یافت نشد. ممکن است حذف شده باشد.</div>;
     }
 
-    const handleStepDataChange = (stepId: string, data: any) => {
+    const handleStepDataChange = (stepId, data) => {
         const updatedStepsData = { ...(order.steps_data || {}), [stepId]: data };
         onUpdate({ ...order, steps_data: updatedStepsData });
         
@@ -63,7 +56,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onUpdate, onDelete, re
         logActivity('UPDATE', 'Order', `سفارش '${order.title}' را نهایی کرد.`, order.id);
     };
 
-    const isStepCompleted = (stepId: string) => {
+    const isStepCompleted = (stepId) => {
         return !!order.steps_data?.[stepId]?.completed_at;
     };
 

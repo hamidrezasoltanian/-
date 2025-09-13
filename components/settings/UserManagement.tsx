@@ -1,15 +1,15 @@
+// This file was renamed to UserManagement.jsx to fix MIME type issues on static hosting.
 import React, { useState, useContext } from 'react';
-import { AppContext } from '../../contexts/AppContext.ts';
-import { User, UserRole } from '../../types.ts';
-import { generateId } from '../../utils/idUtils.ts';
-import Modal from '../shared/Modal.tsx';
-import ConfirmationModal from '../shared/ConfirmationModal.tsx';
+import { AppContext } from '../../contexts/AppContext.js';
+import { generateId } from '../../utils/idUtils.js';
+import Modal from '../shared/Modal.jsx';
+import ConfirmationModal from '../shared/ConfirmationModal.jsx';
 
-const UserForm: React.FC<{ user: Partial<User>; onSave: (user: Partial<User>) => void; onCancel: () => void; }> = ({ user, onSave, onCancel }) => {
+const UserForm = ({ user, onSave, onCancel }) => {
     const [localUser, setLocalUser] = useState(user);
-    const { showNotification } = useContext(AppContext)!;
+    const { showNotification } = useContext(AppContext);
 
-    const handleChange = (field: keyof User, value: string) => {
+    const handleChange = (field, value) => {
         setLocalUser(p => ({ ...p, [field]: value }));
     };
 
@@ -39,24 +39,24 @@ const UserForm: React.FC<{ user: Partial<User>; onSave: (user: Partial<User>) =>
 };
 
 
-const UserManagement: React.FC = () => {
+const UserManagement = () => {
     const context = useContext(AppContext);
     if (!context) throw new Error("AppContext not found");
     const { users, setUsers, showNotification, currentUser, logActivity } = context;
 
-    const [editingUser, setEditingUser] = useState<Partial<User> | null>(null);
-    const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+    const [editingUser, setEditingUser] = useState(null);
+    const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
-    const handleSave = (userToSave: Partial<User>) => {
+    const handleSave = (userToSave) => {
         const trimmedUsername = userToSave.username?.trim();
 
         if (userToSave.id) { // Update
             setUsers(prev => prev.map(u => {
                 if (u.id === userToSave.id) {
-                    const updatedUser: User = {
+                    const updatedUser = {
                         ...u,
-                        username: trimmedUsername!,
-                        role: userToSave.role!
+                        username: trimmedUsername,
+                        role: userToSave.role
                     };
                     // Only update password if a new, non-empty one is provided
                     if (userToSave.password && userToSave.password.trim()) {
@@ -69,11 +69,11 @@ const UserManagement: React.FC = () => {
             showNotification("کاربر با موفقیت به‌روزرسانی شد");
             logActivity('UPDATE', 'User', `کاربر '${trimmedUsername}' را به‌روزرسانی کرد.`, userToSave.id);
         } else { // Create
-            const newUser: User = {
+            const newUser = {
                 id: generateId('user'),
-                username: trimmedUsername!,
-                password: userToSave.password!, // Validation is in form
-                role: userToSave.role!,
+                username: trimmedUsername,
+                password: userToSave.password, // Validation is in form
+                role: userToSave.role,
             };
             setUsers(prev => [...prev, newUser]);
             showNotification("کاربر با موفقیت ایجاد شد");
@@ -97,7 +97,7 @@ const UserManagement: React.FC = () => {
         }
     };
 
-    const roleMap: Record<UserRole, string> = {
+    const roleMap = {
         admin: 'مدیر',
         sales: 'کارشناس فروش',
         procurement: 'کارشناس بازرگانی'

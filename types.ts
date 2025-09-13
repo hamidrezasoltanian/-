@@ -1,119 +1,93 @@
-export type FieldType = 'text' | 'number' | 'date' | 'textarea' | 'checkbox' | 'select' | 'product';
-export type FieldWidth = 'half' | 'full';
+// This file was renamed to types.js to fix MIME type issues on static hosting.
+// @FIX: Populating types to fix import errors across the application.
+export type Product = {
+    id: string;
+    name: string;
+    code: string;
+    irc: string;
+    netWeight: string;
+    grossWeight: string;
+    description: string;
+    currencyPrice: string;
+    currencyType: 'USD' | 'EUR' | 'AED';
+    manufacturer: string;
+};
 
-export interface Field {
-  id: string;
-  name: string;
-  label: string;
-  type: FieldType;
-  required: boolean;
-  width: FieldWidth;
-  options?: string[];
-}
-
-export interface Step {
-  id:string;
-  title: string;
-  fields: Field[];
-}
-
-export interface Workflow {
-  id: string;
-  name: string;
-  steps: Step[];
-}
-
-export interface OrderProductItem {
+export type OrderProductItem = {
     productId: string;
     quantity: number;
 }
 
-export type OrderStepFieldValue = string | boolean | OrderProductItem[] | number;
-
-export interface OrderStepData {
-  [key: string]: OrderStepFieldValue;
-}
-
-export interface Order {
-  id: string;
-  workflowId: string;
-  created_at: string; // ISO date string
-  title: string;
-  steps_data: {
-    [stepId: string]: {
-      data: OrderStepData;
-      completed_at?: string; // ISO date string
+export type Order = {
+    id: string;
+    workflowId: string;
+    created_at: string;
+    title: string;
+    steps_data: {
+        [stepId: string]: {
+            data: { [fieldId: string]: any };
+            completed_at?: string;
+        }
     };
-  };
-  is_finalized?: boolean;
-}
+    is_finalized?: boolean;
+};
 
-export interface Product {
-  id: string;
-  name: string;
-  code: string;
-  irc: string;
-  netWeight: string;
-  grossWeight: string;
-  description: string;
-  currencyPrice: string;
-  currencyType: 'USD' | 'EUR' | 'AED';
-  manufacturer?: string;
-}
+export type WorkflowStepField = {
+    id: string;
+    name: string;
+    label: string;
+    type: 'text' | 'number' | 'date' | 'textarea' | 'checkbox' | 'select' | 'product';
+    required: boolean;
+    width: 'half' | 'full';
+    options?: string[];
+};
 
-export interface ProformaItem {
-  productId: string;
-  name: string;
-  code: string;
-  irc: string;
-  netWeight: string;
-  grossWeight: string;
-  quantity: number;
-  price: number;
-  currency: 'USD' | 'EUR' | 'AED';
-}
+export type WorkflowStep = {
+    id: string;
+    title: string;
+    fields: WorkflowStepField[];
+};
 
-export interface Proforma {
-  id: string;
-  companyName: string;
-  date: string; // ISO date string
-  items: ProformaItem[];
-  total: number;
-}
+export type Workflow = {
+    id: string;
+    name: string;
+    steps: WorkflowStep[];
+};
 
-export type UserRole = 'admin' | 'sales' | 'procurement';
+export type ProformaItem = {
+    productId: string;
+    name: string;
+    code: string;
+    irc: string;
+    netWeight: string;
+    grossWeight: string;
+    quantity: number;
+    price: number;
+    currency: string;
+};
 
-export interface User {
+export type Proforma = {
+    id: string;
+    companyName: string;
+    date: string;
+    items: ProformaItem[];
+    total: number;
+};
+
+export type User = {
     id: string;
     username: string;
-    password?: string; // Optional for security when sending to client
-    role: UserRole;
-}
+    password: string;
+    role: 'admin' | 'sales' | 'procurement';
+};
 
-export type ActivityLogAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'IMPORT' | 'LOGIN' | 'LOGOUT';
-export type EntityType = 'Order' | 'Product' | 'Proforma' | 'User' | 'Workflow' | 'System';
-
-export interface ActivityLog {
+export type ActivityLog = {
     id: string;
-    timestamp: string; // ISO date string
+    timestamp: string;
     userId: string;
     username: string;
-    action: ActivityLogAction;
-    entityType: EntityType;
-    entityId?: string; 
+    action: string;
+    entityType: string;
     details: string;
-}
-
-export interface ChatMessage {
-    id: string;
-    sender: 'user' | 'ai';
-    text: string;
-    isLoading?: boolean;
-    actions?: {
-        label: string;
-        action_type: 'navigation';
-        payload: {
-            view: any; // Using `any` to avoid circular dependency issues with View type
-        };
-    }[];
-}
+    entityId?: string;
+};

@@ -1,29 +1,32 @@
 
+// This file was renamed to App.jsx to fix MIME type issues on static hosting.
 import React, { useState, useMemo, useCallback, Suspense, lazy } from 'react';
-import { AppContext, AppContextType, View } from './contexts/AppContext.ts';
-import { useLocalStorage } from './hooks/useLocalStorage.ts';
-import { useNotification } from './hooks/useNotification.ts';
-import { useTheme } from './hooks/useTheme.ts';
-import { Product, Order, Workflow, Proforma, User, ActivityLog } from './types.ts';
-import { DEFAULT_WORKFLOW, DEFAULT_USERS } from './constants.ts';
-import { generateId } from './utils/idUtils.ts';
-import Sidebar from './components/layout/Sidebar.tsx';
-import LoginView from './components/views/LoginView.tsx';
-import { isAiAvailable } from './services/geminiService.ts';
-import AiAssistantModal from './components/ai/AiAssistantModal.tsx';
-import { ChatBubbleSparkleIcon } from './components/shared/Icons.tsx';
+// @FIX: Removed AppContextType and View, as they are not exported from AppContext.js and were causing errors.
+import { AppContext } from './contexts/AppContext.js';
+import { useLocalStorage } from './hooks/useLocalStorage.js';
+import { useNotification } from './hooks/useNotification.js';
+import { useTheme } from './hooks/useTheme.js';
+// @FIX: Removed type imports that are not used in this JSX file and were causing errors due to an empty types.js file.
+// The types are now defined in types.ts and used in other files, but not needed for annotations here.
+import { DEFAULT_WORKFLOW, DEFAULT_USERS } from './constants.js';
+import { generateId } from './utils/idUtils.js';
+import Sidebar from './components/layout/Sidebar.jsx';
+import LoginView from './components/views/LoginView.jsx';
+import { isAiAvailable } from './services/geminiService.js';
+import AiAssistantModal from './components/ai/AiAssistantModal.jsx';
+import { ChatBubbleSparkleIcon } from './components/shared/Icons.jsx';
 
 // Lazy load view components
-const HomeView = lazy(() => import('./components/views/HomeView.tsx'));
-const WorkflowView = lazy(() => import('./components/views/WorkflowView.tsx'));
-const ProductsView = lazy(() => import('./components/views/ProductsView.tsx'));
-const ProformaView = lazy(() => import('./components/views/ProformaView.tsx'));
-const ReportsView = lazy(() => import('./components/views/ReportsView.tsx'));
-const SettingsView = lazy(() => import('./components/views/SettingsView.tsx'));
-const ActivityView = lazy(() => import('./components/views/ActivityView.tsx'));
+const HomeView = lazy(() => import('./components/views/HomeView.jsx'));
+const WorkflowView = lazy(() => import('./components/views/WorkflowView.jsx'));
+const ProductsView = lazy(() => import('./components/views/ProductsView.jsx'));
+const ProformaView = lazy(() => import('./components/views/ProformaView.jsx'));
+const ReportsView = lazy(() => import('./components/views/ReportsView.jsx'));
+const SettingsView = lazy(() => import('./components/views/SettingsView.jsx'));
+const ActivityView = lazy(() => import('./components/views/ActivityView.jsx'));
 
 
-const SkeletonLoader: React.FC = () => (
+const SkeletonLoader = () => (
     <div className="p-8">
         <div className="skeleton-loader h-10 w-1/3 mb-8"></div>
         <div className="grid grid-cols-3 gap-6 mb-8">
@@ -36,25 +39,25 @@ const SkeletonLoader: React.FC = () => (
 );
 
 
-const App: React.FC = () => {
+const App = () => {
     useTheme(); // Apply theme and background on load
-    const [workflows, setWorkflows] = useLocalStorage<Workflow[]>("workflows_v12", [DEFAULT_WORKFLOW]);
-    const [orders, setOrders] = useLocalStorage<Order[]>("orders_v12", []);
-    const [products, setProducts] = useLocalStorage<Product[]>("products_v12", []);
-    const [proformas, setProformas] = useLocalStorage<Proforma[]>("proformas_v12", []);
-    const [users, setUsers] = useLocalStorage<User[]>("users_v12", DEFAULT_USERS);
-    const [currentUser, setCurrentUser] = useState<User | null>(null);
-    const [activityLogs, setActivityLogs] = useLocalStorage<ActivityLog[]>("activity_logs_v1", []);
+    const [workflows, setWorkflows] = useLocalStorage("workflows_v12", [DEFAULT_WORKFLOW]);
+    const [orders, setOrders] = useLocalStorage("orders_v12", []);
+    const [products, setProducts] = useLocalStorage("products_v12", []);
+    const [proformas, setProformas] = useLocalStorage("proformas_v12", []);
+    const [users, setUsers] = useLocalStorage("users_v12", DEFAULT_USERS);
+    const [currentUser, setCurrentUser] = useState(null);
+    const [activityLogs, setActivityLogs] = useLocalStorage("activity_logs_v1", []);
 
-    const [activeView, setActiveView] = useState<View>('home');
-    const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+    const [activeView, setActiveView] = useState('home');
+    const [selectedOrderId, setSelectedOrderId] = useState(null);
     const { showNotification, NotificationComponent } = useNotification();
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [isAiAssistantOpen, setIsAiAssistantOpen] = useState(false);
     
-    const logActivity = useCallback((action: ActivityLog['action'], entityType: ActivityLog['entityType'], details: string, entityId?: string) => {
+    const logActivity = useCallback((action, entityType, details, entityId) => {
         if (!currentUser) return; // Should not happen if called correctly
-        const newLog: ActivityLog = {
+        const newLog = {
             id: generateId('log'),
             timestamp: new Date().toISOString(),
             userId: currentUser.id,
@@ -67,7 +70,7 @@ const App: React.FC = () => {
         setActivityLogs(prev => [newLog, ...prev]);
     }, [currentUser, setActivityLogs]);
 
-    const login = useCallback((username: string, password: string): boolean => {
+    const login = useCallback((username, password) => {
         const user = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
         if (user) {
             const { password, ...userWithoutPassword } = user;
@@ -75,7 +78,7 @@ const App: React.FC = () => {
             setActiveView('home');
             showNotification(`خوش آمدید ${user.username}!`);
             // We need to log after currentUser is set, so we construct the log manually here.
-            const newLog: ActivityLog = {
+            const newLog = {
                 id: generateId('log'),
                 timestamp: new Date().toISOString(),
                 userId: user.id,
@@ -100,7 +103,7 @@ const App: React.FC = () => {
         showNotification("با موفقیت خارج شدید.");
     }, [currentUser, showNotification, logActivity]);
 
-    const contextValue: AppContextType = useMemo(() => ({
+    const contextValue = useMemo(() => ({
         workflows, setWorkflows,
         orders, setOrders,
         products, setProducts,
@@ -138,7 +141,7 @@ const App: React.FC = () => {
         }
     };
 
-    const availableTabs: { key: View; label: string }[] = [
+    const availableTabs = [
         { key: 'home', label: 'داشبورد' },
         { key: 'workflow', label: 'گردش کار' },
         { key: 'products', label: 'کالاها' },

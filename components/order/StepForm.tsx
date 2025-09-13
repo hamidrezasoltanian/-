@@ -1,24 +1,16 @@
+// This file was renamed to StepForm.jsx to fix MIME type issues on static hosting.
+import React, { useState, useContext, useCallback } from 'react';
+import { AppContext } from '../../contexts/AppContext.js';
+import KamaDatePicker from '../shared/KamaDatePicker.jsx';
+import ProductSelectorField from './ProductSelectorField.jsx';
 
-import React, { useState, useContext, useCallback, useEffect } from 'react';
-import { AppContext } from '../../contexts/AppContext.ts';
-import { Order, Step, Field, OrderStepData, OrderStepFieldValue } from '../../types.ts';
-import KamaDatePicker from '../shared/KamaDatePicker.tsx';
-import ProductSelectorField from './ProductSelectorField.tsx';
-
-interface StepFormProps {
-    order: Order;
-    workflowStep: Step;
-    onStepDataChange: (stepId: string, data: { data: OrderStepData; completed_at: string }) => void;
-    readOnly?: boolean;
-}
-
-const StepForm: React.FC<StepFormProps> = ({ order, workflowStep, onStepDataChange, readOnly = false }) => {
-    const { showNotification } = useContext(AppContext)!;
+const StepForm = ({ order, workflowStep, onStepDataChange, readOnly = false }) => {
+    const { showNotification } = useContext(AppContext);
     
-    const [formData, setFormData] = useState<OrderStepData>(() => order.steps_data?.[workflowStep.id]?.data || {});
-    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [formData, setFormData] = useState(() => order.steps_data?.[workflowStep.id]?.data || {});
+    const [errors, setErrors] = useState({});
 
-    const handleChange = useCallback((e: { target: { name: string, value: OrderStepFieldValue, type?: string, checked?: boolean } }) => {
+    const handleChange = useCallback((e) => {
         const { name, value, type, checked } = e.target;
         const finalValue = type === 'checkbox' ? checked : value;
         setFormData(prev => ({ ...prev, [name]: finalValue }));
@@ -27,11 +19,11 @@ const StepForm: React.FC<StepFormProps> = ({ order, workflowStep, onStepDataChan
         }
     }, [errors]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         if (readOnly) return;
         
-        const newErrors: Record<string, string> = {};
+        const newErrors = {};
         workflowStep.fields.forEach(field => {
             const value = formData[field.name];
             if (field.required) {
@@ -57,7 +49,7 @@ const StepForm: React.FC<StepFormProps> = ({ order, workflowStep, onStepDataChan
         }
     };
     
-    const renderField = (field: Field) => {
+    const renderField = (field) => {
         const value = formData[field.name];
         const error = errors[field.name];
         const disabledClass = "disabled:bg-gray-100 disabled:cursor-not-allowed";

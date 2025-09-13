@@ -1,16 +1,10 @@
-
+// This file was renamed to OrderSummary.jsx to fix MIME type issues on static hosting.
 import React, { useContext } from 'react';
-import { AppContext } from '../../contexts/AppContext.ts';
-import { Order, OrderProductItem, Product } from '../../types.ts';
-import { toJalali } from '../../utils/dateUtils.ts';
-import { formatNumber } from '../../utils/formatters.ts';
+import { AppContext } from '../../contexts/AppContext.js';
+import { toJalali } from '../../utils/dateUtils.js';
+import { formatNumber } from '../../utils/formatters.js';
 
-interface OrderSummaryProps {
-    order: Order;
-    onClose: () => void;
-}
-
-const OrderSummary: React.FC<OrderSummaryProps> = ({ order, onClose }) => {
+const OrderSummary = ({ order, onClose }) => {
     const context = useContext(AppContext);
     if (!context) return null;
     const { workflows, products } = context;
@@ -21,7 +15,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ order, onClose }) => {
         window.print();
     };
     
-    const renderFieldValue = (field: any, value: any): React.ReactNode => {
+    const renderFieldValue = (field, value) => {
         if (value === undefined || value === null || value === '') return <span className="text-gray-500">--</span>;
         switch (field.type) {
             case 'date':
@@ -29,7 +23,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ order, onClose }) => {
             case 'checkbox':
                 return value ? 'بله' : 'خیر';
             case 'product':
-                const items = value as OrderProductItem[];
+                const items = value;
                 if (!items || items.length === 0) return <span className="text-gray-500">--</span>;
                 
                 const total = items.reduce((acc, item) => {

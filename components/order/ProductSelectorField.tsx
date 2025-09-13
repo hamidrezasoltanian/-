@@ -1,35 +1,25 @@
-
-
+// This file was renamed to ProductSelectorField.jsx to fix MIME type issues on static hosting.
 import React, { useContext, useMemo } from 'react';
-import { AppContext } from '../../contexts/AppContext.ts';
-import { Field, OrderProductItem, Product } from '../../types.ts';
-import { formatNumber } from '../../utils/formatters.ts';
+import { AppContext } from '../../contexts/AppContext.js';
+import { formatNumber } from '../../utils/formatters.js';
 
-interface ProductSelectorFieldProps {
-    field: Field;
-    value: OrderProductItem[];
-    onChange: (e: { target: { name: string; value: OrderProductItem[] } }) => void;
-    error?: boolean;
-    readOnly?: boolean;
-}
-
-const ProductSelectorField: React.FC<ProductSelectorFieldProps> = ({ field, value, onChange, error, readOnly = false }) => {
-    const { products } = useContext(AppContext)!;
+const ProductSelectorField = ({ field, value, onChange, error, readOnly = false }) => {
+    const { products } = useContext(AppContext);
     const selectedItems = value || [];
 
-    const handleQuantityChange = (productId: string, quantity: string) => {
+    const handleQuantityChange = (productId, quantity) => {
         const newItems = selectedItems.map(item =>
             item.productId === productId ? { ...item, quantity: parseInt(quantity, 10) || 0 } : item
         );
         onChange({ target: { name: field.name, value: newItems } });
     };
     
-    const handleRemoveItem = (productId: string) => {
+    const handleRemoveItem = (productId) => {
         const newItems = selectedItems.filter(item => item.productId !== productId);
         onChange({ target: { name: field.name, value: newItems } });
     };
 
-    const handleProductAdd = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const handleProductAdd = (e) => {
         const productId = e.target.value;
         if (productId) {
              const newItems = [...selectedItems, { productId, quantity: 1 }];

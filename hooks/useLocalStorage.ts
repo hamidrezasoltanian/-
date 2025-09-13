@@ -1,8 +1,8 @@
-
+// This file was renamed to useLocalStorage.js to fix MIME type issues on static hosting.
 import React, { useState, useCallback } from 'react';
 
-export function useLocalStorage<T,>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
-  const [storedValue, setStoredValue] = useState<T>(() => {
+export function useLocalStorage(key, initialValue) {
+  const [storedValue, setStoredValue] = useState(() => {
     if (typeof window === 'undefined') {
       return initialValue;
     }
@@ -15,7 +15,7 @@ export function useLocalStorage<T,>(key: string, initialValue: T): [T, React.Dis
     }
   });
 
-  const setValue = useCallback<React.Dispatch<React.SetStateAction<T>>>((value) => {
+  const setValue = useCallback((value) => {
     try {
       const valueToStore = value instanceof Function ? value(storedValue) : value;
       setStoredValue(valueToStore);

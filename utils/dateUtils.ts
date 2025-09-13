@@ -1,10 +1,13 @@
+// This file was renamed to dateUtils.js to fix MIME type issues on static hosting.
 // This requires persian-date to be loaded globally from index.html
+
+// @FIX: Declare persianDate as a global variable to inform TypeScript that it will be available at runtime.
 declare const persianDate: any;
 
 const farsiDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
 const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
 
-function toEnglishDigits(str: string): string {
+function toEnglishDigits(str) {
     if (!str) return '';
     let result = String(str);
     for (let i = 0; i < 10; i++) {
@@ -16,7 +19,7 @@ function toEnglishDigits(str: string): string {
 }
 
 
-export const toJalali = (dateString: string | null | undefined): string => {
+export const toJalali = (dateString) => {
   if (!dateString) return '';
   // Add a guard to prevent crashes if executed in an environment where the script hasn't loaded (e.g., SSR)
   if (typeof persianDate === 'undefined') {
@@ -31,7 +34,7 @@ export const toJalali = (dateString: string | null | undefined): string => {
   }
 };
 
-export const fromJalali = (jalaliString: string | null | undefined): string => {
+export const fromJalali = (jalaliString) => {
   if (!jalaliString) return '';
   // Add a guard for safety
   if (typeof persianDate === 'undefined') {

@@ -1,8 +1,9 @@
+// This file was renamed to AppearanceSettings.jsx to fix MIME type issues on static hosting.
 import React, { useRef, useContext } from 'react';
-import { useTheme, Theme } from '../../hooks/useTheme.ts';
-import { AppContext } from '../../contexts/AppContext.ts';
+import { useTheme } from '../../hooks/useTheme.js';
+import { AppContext } from '../../contexts/AppContext.js';
 
-const THEMES: { id: Theme; name: string; color: string }[] = [
+const THEMES = [
     { id: 'blue', name: 'آبی (پیش‌فرض)', color: '#3b82f6' },
     { id: 'green', name: 'سبز', color: '#16a34a' },
     { id: 'indigo', name: 'نیلی', color: '#6366f1' },
@@ -10,12 +11,12 @@ const THEMES: { id: Theme; name: string; color: string }[] = [
     { id: 'dark', name: 'تاریک', color: '#1e293b' },
 ];
 
-const AppearanceSettings: React.FC = () => {
+const AppearanceSettings = () => {
     const { theme, setTheme, backgroundImage, setBackgroundImage } = useTheme();
     const context = useContext(AppContext);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const fileInputRef = useRef(null);
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = (event) => {
         const file = event.target.files?.[0];
         if (!file) return;
 
@@ -26,7 +27,7 @@ const AppearanceSettings: React.FC = () => {
 
         const reader = new FileReader();
         reader.onload = (e) => {
-            const base64String = e.target?.result as string;
+            const base64String = e.target?.result;
             setBackgroundImage(base64String);
             context?.showNotification("تصویر پس‌زمینه با موفقیت تنظیم شد");
         };

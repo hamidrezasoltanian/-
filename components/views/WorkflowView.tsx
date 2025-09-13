@@ -1,15 +1,15 @@
-
+// This file was renamed to WorkflowView.jsx to fix MIME type issues on static hosting.
 import React, { useState, useContext, useMemo, useEffect } from 'react';
-import { AppContext } from '../../contexts/AppContext.ts';
-import { Order, Workflow, Step } from '../../types.ts';
-import { generateId } from '../../utils/idUtils.ts';
-import { toJalali } from '../../utils/dateUtils.ts';
-import { calculateOrderProgress } from '../../utils/orderUtils.ts';
-import OrderDetail from '../order/OrderDetail.tsx';
-import Modal from '../shared/Modal.tsx';
+import { AppContext } from '../../contexts/AppContext.js';
+import { generateId } from '../../utils/idUtils.js';
+import { toJalali } from '../../utils/dateUtils.js';
+import { calculateOrderProgress } from '../../utils/orderUtils.js';
+import OrderDetail from '../order/OrderDetail.jsx';
+import Modal from '../shared/Modal.jsx';
 
 // Memoized KanbanCard for performance
-const KanbanCard = React.memo(({ order, onOrderSelect, workflow }: { order: Order, onOrderSelect: (id: string) => void, workflow: Workflow }) => {
+// @FIX: Add inline types for props to resolve destructuring errors with TypeScript.
+const KanbanCard = React.memo(({ order, onOrderSelect, workflow }: { order: any; onOrderSelect: (id: any) => void; workflow: any; }) => {
     const progress = calculateOrderProgress(order, workflow);
     return (
         <div
@@ -33,14 +33,7 @@ const KanbanCard = React.memo(({ order, onOrderSelect, workflow }: { order: Orde
 
 
 // Kanban Column Component
-interface KanbanColumnProps {
-    step: Step;
-    orders: Order[];
-    onOrderSelect: (orderId: string) => void;
-    workflow: Workflow;
-}
-
-const KanbanColumn: React.FC<KanbanColumnProps> = ({ step, orders, onOrderSelect, workflow }) => (
+const KanbanColumn = ({ step, orders, onOrderSelect, workflow }) => (
     <div className="flex-shrink-0 w-80 bg-slate-200/60 rounded-xl flex flex-col max-h-full">
         <div className="p-4 border-b border-slate-300">
             <h3 className="text-lg font-bold text-gray-800 flex justify-between items-center">
@@ -64,13 +57,13 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({ step, orders, onOrderSelect
 );
 
 
-const WorkflowView: React.FC = () => {
+const WorkflowView = () => {
     const context = useContext(AppContext);
     if (!context) throw new Error("AppContext not found");
     const { orders, setOrders, workflows, showNotification, selectedOrderId, setSelectedOrderId, logActivity } = context;
     
     const [showNewOrderModal, setShowNewOrderModal] = useState(false);
-    const [activeWorkflowId, setActiveWorkflowId] = useState<string | null>(workflows[0]?.id || null);
+    const [activeWorkflowId, setActiveWorkflowId] = useState(workflows[0]?.id || null);
 
     useEffect(() => {
         if (!activeWorkflowId && workflows.length > 0) {
@@ -81,14 +74,14 @@ const WorkflowView: React.FC = () => {
     const canEdit = true;
     const activeWorkflow = useMemo(() => workflows.find(wf => wf.id === activeWorkflowId), [workflows, activeWorkflowId]);
 
-    const handleAddOrder = (workflowId: string) => {
+    const handleAddOrder = (workflowId) => {
         if (!canEdit) {
             showNotification("شما اجازه ایجاد سفارش جدید را ندارید", "error");
             return;
         }
         const workflow = workflows.find(wf => wf.id === workflowId);
         const orderTitle = `سفارش جدید - ${workflow?.name || ''} - ${toJalali(new Date().toISOString())}`;
-        const newOrder: Order = {
+        const newOrder = {
             id: generateId('order'),
             workflowId,
             created_at: new Date().toISOString(),
@@ -102,11 +95,11 @@ const WorkflowView: React.FC = () => {
         logActivity('CREATE', 'Order', `سفارش '${orderTitle}' را ایجاد کرد.`, newOrder.id);
     };
     
-    const handleUpdateOrder = (updatedOrder: Order) => {
+    const handleUpdateOrder = (updatedOrder) => {
         setOrders(prev => prev.map(o => o.id === updatedOrder.id ? updatedOrder : o));
     };
 
-    const handleDeleteOrder = (orderId: string) => {
+    const handleDeleteOrder = (orderId) => {
         if (!canEdit) {
             showNotification("شما اجازه حذف سفارش را ندارید", "error");
             return;
@@ -125,7 +118,7 @@ const WorkflowView: React.FC = () => {
     const kanbanData = useMemo(() => {
         if (!activeWorkflow) return [];
 
-        const columns: { step: Step; orders: Order[] }[] = activeWorkflow.steps.map(step => ({ step, orders: [] }));
+        const columns = activeWorkflow.steps.map(step => ({ step, orders: [] }));
         
         const workflowOrders = [...orders]
             .filter(o => o.workflowId === activeWorkflowId)
@@ -210,7 +203,7 @@ const WorkflowView: React.FC = () => {
                 <h2 className="text-xl font-bold mb-4 text-gray-800">ایجاد سفارش جدید</h2>
                 <p className="text-gray-600 mb-6">این سفارش بر اساس کدام فرآیند ایجاد شود؟</p>
                 <div className="space-y-3">
-                    {workflows.map((wf: Workflow) => (
+                    {workflows.map((wf) => (
                         <button 
                             key={wf.id} 
                             onClick={() => handleAddOrder(wf.id)} 

@@ -1,32 +1,27 @@
+// This file was renamed to WorkflowEditor.jsx to fix MIME type issues on static hosting.
 import React, { useState, useContext } from 'react';
-import { AppContext } from '../../contexts/AppContext.ts';
-import { Workflow, Step, Field } from '../../types.ts';
-import { generateId } from '../../utils/idUtils.ts';
-import FieldEditor from './FieldEditor.tsx';
+import { AppContext } from '../../contexts/AppContext.js';
+import { generateId } from '../../utils/idUtils.js';
+import FieldEditor from './FieldEditor.jsx';
 
-interface WorkflowEditorProps {
-    workflow: Workflow;
-    onBack: () => void;
-}
-
-const WorkflowEditor: React.FC<WorkflowEditorProps> = ({ workflow, onBack }) => {
+const WorkflowEditor = ({ workflow, onBack }) => {
     const context = useContext(AppContext);
     if (!context) throw new Error("AppContext not found");
     const { setWorkflows, showNotification, logActivity } = context;
 
-    const [localWorkflow, setLocalWorkflow] = useState<Workflow>(workflow);
-    const [draggedField, setDraggedField] = useState<{ stepId: string, fieldId: string } | null>(null);
+    const [localWorkflow, setLocalWorkflow] = useState(workflow);
+    const [draggedField, setDraggedField] = useState(null);
 
-    const handleWorkflowNameChange = (e: React.ChangeEvent<HTMLInputElement>) => setLocalWorkflow(prev => ({ ...prev, name: e.target.value }));
+    const handleWorkflowNameChange = (e) => setLocalWorkflow(prev => ({ ...prev, name: e.target.value }));
     const handleAddStep = () => setLocalWorkflow(prev => ({ ...prev, steps: [...prev.steps, { id: generateId('step'), title: 'مرحله جدید', fields: [] }] }));
-    const handleUpdateStep = (stepId: string, newTitle: string) => setLocalWorkflow(prev => ({ ...prev, steps: prev.steps.map(s => s.id === stepId ? { ...s, title: newTitle } : s) }));
-    const handleDeleteStep = (stepId: string) => setLocalWorkflow(prev => ({ ...prev, steps: prev.steps.filter(s => s.id !== stepId) }));
-    const handleAddField = (stepId: string) => {
-        const newField: Field = { id: generateId('field'), name: `field_${Date.now()}`, label: 'فیلد جدید', type: 'text', required: false, width: 'half' };
+    const handleUpdateStep = (stepId, newTitle) => setLocalWorkflow(prev => ({ ...prev, steps: prev.steps.map(s => s.id === stepId ? { ...s, title: newTitle } : s) }));
+    const handleDeleteStep = (stepId) => setLocalWorkflow(prev => ({ ...prev, steps: prev.steps.filter(s => s.id !== stepId) }));
+    const handleAddField = (stepId) => {
+        const newField = { id: generateId('field'), name: `field_${Date.now()}`, label: 'فیلد جدید', type: 'text', required: false, width: 'half' };
         setLocalWorkflow(prev => ({ ...prev, steps: prev.steps.map(s => s.id === stepId ? { ...s, fields: [...s.fields, newField] } : s) }));
     };
-    const handleUpdateField = (stepId: string, updatedField: Field) => setLocalWorkflow(prev => ({ ...prev, steps: prev.steps.map(s => s.id === stepId ? { ...s, fields: s.fields.map(f => f.id === updatedField.id ? updatedField : f) } : s) }));
-    const handleDeleteField = (stepId: string, fieldId: string) => setLocalWorkflow(prev => ({ ...prev, steps: prev.steps.map(s => s.id === stepId ? { ...s, fields: s.fields.filter(f => f.id !== fieldId) } : s) }));
+    const handleUpdateField = (stepId, updatedField) => setLocalWorkflow(prev => ({ ...prev, steps: prev.steps.map(s => s.id === stepId ? { ...s, fields: s.fields.map(f => f.id === updatedField.id ? updatedField : f) } : s) }));
+    const handleDeleteField = (stepId, fieldId) => setLocalWorkflow(prev => ({ ...prev, steps: prev.steps.map(s => s.id === stepId ? { ...s, fields: s.fields.filter(f => f.id !== fieldId) } : s) }));
     
     const handleSave = () => {
         setWorkflows(prev => prev.map(wf => wf.id === localWorkflow.id ? localWorkflow : wf));
@@ -35,23 +30,23 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({ workflow, onBack }) => 
         onBack();
     };
     
-    const handleFieldDragStart = (e: React.DragEvent<HTMLDivElement>, stepId: string, fieldId: string) => {
+    const handleFieldDragStart = (e, stepId, fieldId) => {
         setDraggedField({ stepId, fieldId });
         e.dataTransfer.effectAllowed = 'move';
     };
 
-    const handleFieldDrop = (e: React.DragEvent<HTMLDivElement>, targetStepId: string, targetFieldId: string) => {
+    const handleFieldDrop = (e, targetStepId, targetFieldId) => {
         e.preventDefault();
         if (!draggedField || draggedField.stepId !== targetStepId) return;
 
         setLocalWorkflow(prev => {
             const newWorkflow = JSON.parse(JSON.stringify(prev));
-            const step = newWorkflow.steps.find((s: Step) => s.id === targetStepId);
+            const step = newWorkflow.steps.find((s) => s.id === targetStepId);
             if (!step) return prev;
 
             const fields = step.fields;
-            const draggedIndex = fields.findIndex((f: Field) => f.id === draggedField.fieldId);
-            const targetIndex = fields.findIndex((f: Field) => f.id === targetFieldId);
+            const draggedIndex = fields.findIndex((f) => f.id === draggedField.fieldId);
+            const targetIndex = fields.findIndex((f) => f.id === targetFieldId);
 
             if (draggedIndex === -1 || targetIndex === -1) return prev;
             

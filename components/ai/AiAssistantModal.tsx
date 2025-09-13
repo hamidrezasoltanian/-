@@ -1,21 +1,15 @@
-
+// This file was renamed to AiAssistantModal.jsx to fix MIME type issues on static hosting.
 import React, { useState, useContext, useRef, useEffect } from 'react';
-import { AppContext } from '../../contexts/AppContext.ts';
-import { ChatMessage } from '../../types.ts';
-import { chatWithAssistant } from '../../services/geminiService.ts';
-import { generateId } from '../../utils/idUtils.ts';
-import { AiSparkleIcon } from '../shared/Icons.tsx';
+import { AppContext } from '../../contexts/AppContext.js';
+import { chatWithAssistant } from '../../services/geminiService.js';
+import { generateId } from '../../utils/idUtils.js';
+import { AiSparkleIcon } from '../shared/Icons.jsx';
 
-interface AiAssistantModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-}
-
-const AiAssistantModal: React.FC<AiAssistantModalProps> = ({ isOpen, onClose }) => {
+const AiAssistantModal = ({ isOpen, onClose }) => {
     const context = useContext(AppContext);
-    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
-    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const messagesEndRef = useRef(null);
 
     useEffect(() => {
         if (isOpen && messages.length === 0) {
@@ -31,8 +25,8 @@ const AiAssistantModal: React.FC<AiAssistantModalProps> = ({ isOpen, onClose }) 
 
     const handleSend = async () => {
         if (!input.trim() || !context) return;
-        const userInput: ChatMessage = { id: generateId('chat'), sender: 'user', text: input };
-        const loadingMessage: ChatMessage = { id: generateId('chat'), sender: 'ai', text: '...', isLoading: true };
+        const userInput = { id: generateId('chat'), sender: 'user', text: input };
+        const loadingMessage = { id: generateId('chat'), sender: 'ai', text: '...', isLoading: true };
 
         setMessages(prev => [...prev, userInput, loadingMessage]);
         setInput('');
@@ -40,7 +34,7 @@ const AiAssistantModal: React.FC<AiAssistantModalProps> = ({ isOpen, onClose }) 
         const { orders, products, workflows, proformas } = context;
         const aiResponse = await chatWithAssistant(input, { orders, products, workflows, proformas });
 
-        const finalAiMessage: ChatMessage = {
+        const finalAiMessage = {
             id: loadingMessage.id, // Replace the loading message
             sender: 'ai',
             text: aiResponse.text || 'خطایی رخ داد.',
@@ -50,7 +44,7 @@ const AiAssistantModal: React.FC<AiAssistantModalProps> = ({ isOpen, onClose }) 
         setMessages(prev => prev.map(msg => msg.id === loadingMessage.id ? finalAiMessage : msg));
     };
 
-    const handleActionClick = (action: ChatMessage['actions'][0]) => {
+    const handleActionClick = (action) => {
         if (action.action_type === 'navigation' && context) {
             context.setActiveView(action.payload.view);
             onClose();

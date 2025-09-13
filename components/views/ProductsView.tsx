@@ -1,21 +1,20 @@
-
+// This file was renamed to ProductsView.jsx to fix MIME type issues on static hosting.
 import React, { useState, useMemo, useContext, useRef } from 'react';
-import { AppContext, AppContextType } from '../../contexts/AppContext.ts';
-import { Product } from '../../types.ts';
-import { formatNumber } from '../../utils/formatters.ts';
-import { generateId } from '../../utils/idUtils.ts';
-import Modal from '../shared/Modal.tsx';
-import ConfirmationModal from '../shared/ConfirmationModal.tsx';
-import { isAiAvailable, generateProductDescription } from '../../services/geminiService.ts';
-import { AiSparkleIcon } from '../shared/Icons.tsx';
-import { useDebounce } from '../../hooks/useDebounce.ts';
+import { AppContext } from '../../contexts/AppContext.js';
+import { formatNumber } from '../../utils/formatters.js';
+import { generateId } from '../../utils/idUtils.js';
+import Modal from '../shared/Modal.jsx';
+import ConfirmationModal from '../shared/ConfirmationModal.jsx';
+import { isAiAvailable, generateProductDescription } from '../../services/geminiService.js';
+import { AiSparkleIcon } from '../shared/Icons.jsx';
+import { useDebounce } from '../../hooks/useDebounce.js';
 
 // ProductForm Component
-const ProductForm: React.FC<{ product: Partial<Product>; onSave: (product: Product) => void; onCancel: () => void; showNotification: AppContextType['showNotification'] }> = ({ product, onSave, onCancel, showNotification }) => {
-    const [localProduct, setLocalProduct] = useState<Partial<Product>>(product);
+const ProductForm = ({ product, onSave, onCancel, showNotification }) => {
+    const [localProduct, setLocalProduct] = useState(product);
     const [isGenerating, setIsGenerating] = useState(false);
 
-    const handleChange = (field: keyof Product, value: string) => {
+    const handleChange = (field, value) => {
         setLocalProduct(p => ({ ...p, [field]: value }));
     };
 
@@ -92,7 +91,8 @@ const ProductForm: React.FC<{ product: Partial<Product>; onSave: (product: Produ
 };
 
 // Memoized ProductRow Component for performance
-const ProductRow = React.memo(({ product, onEdit, onDelete, canEdit }: { product: Product, onEdit: (p: Product) => void, onDelete: (id: string) => void, canEdit: boolean }) => {
+// @FIX: Added inline types for props to resolve destructuring errors with TypeScript.
+const ProductRow = React.memo(({ product, onEdit, onDelete, canEdit }: { product: any; onEdit: (product: any) => void; onDelete: (id: any) => void; canEdit: boolean; }) => {
     return (
         <tr className="hover:bg-gray-50 transition-colors">
             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.name}</td>
@@ -110,16 +110,16 @@ const ProductRow = React.memo(({ product, onEdit, onDelete, canEdit }: { product
 });
 
 // Main ProductsView Component
-const ProductsView: React.FC = () => {
+const ProductsView = () => {
     const context = useContext(AppContext);
     if (!context) throw new Error("AppContext not found");
     const { products, setProducts, showNotification, logActivity } = context;
 
-    const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
+    const [editingProduct, setEditingProduct] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
-    const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+    const fileInputRef = useRef(null);
 
     const canEdit = true;
 
@@ -135,10 +135,10 @@ const ProductsView: React.FC = () => {
     }, [products, debouncedSearchTerm]);
 
     const handleAdd = () => setEditingProduct({});
-    const handleEdit = (product: Product) => setEditingProduct(product);
-    const handleDeleteRequest = (id: string) => setDeleteConfirmId(id);
+    const handleEdit = (product) => setEditingProduct(product);
+    const handleDeleteRequest = (id) => setDeleteConfirmId(id);
 
-    const handleSave = (productToSave: Product) => {
+    const handleSave = (productToSave) => {
         if (!canEdit) {
             showNotification("شما اجازه ویرایش کالاها را ندارید", "error");
             return;
@@ -187,14 +187,19 @@ const ProductsView: React.FC = () => {
         document.body.removeChild(link);
     };
     
-    const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileImport = (event) => {
         const file = event.target.files?.[0];
         if (!file) return;
 
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
-                const text = e.target?.result as string;
+                // @FIX: Ensure file content is a string before calling .split()
+                const text = e.target?.result;
+                if (typeof text !== 'string') {
+                    showNotification("خطا در خواندن محتوای فایل", "error");
+                    return;
+                }
                 const lines = text.split('\n').filter(line => line.trim() !== '');
                 if (lines.length < 2) {
                     showNotification("فایل خالی یا نامعتبر است", "error");
@@ -207,11 +212,12 @@ const ProductsView: React.FC = () => {
                     return;
                 }
 
-                const newProducts: Product[] = [];
+                const newProducts = [];
                 let hasError = false;
                 lines.slice(1).forEach((line, index) => {
                     const values = line.trim().split(',');
-                    const rowData: any = {};
+                    // @FIX: Type rowData to allow dynamic property access.
+                    const rowData: Record<string, string> = {};
                     header.forEach((h, i) => rowData[h] = values[i]?.trim());
                     
                     if (!rowData.name || !rowData.code) {

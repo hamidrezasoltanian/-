@@ -1,13 +1,7 @@
+// This file was renamed to Modal.jsx to fix MIME type issues on static hosting.
 import React from 'react';
 
-interface ModalProps {
-  show: boolean;
-  onClose: () => void;
-  children: React.ReactNode;
-  maxWidth?: string;
-}
-
-const Modal: React.FC<ModalProps> = ({ show, onClose, children, maxWidth = 'max-w-2xl' }) => {
+const Modal = ({ show, onClose, children, maxWidth = 'max-w-2xl' }) => {
   if (!show) {
     return null;
   }

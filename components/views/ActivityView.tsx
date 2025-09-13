@@ -1,9 +1,10 @@
+// This file was renamed to ActivityView.jsx to fix MIME type issues on static hosting.
 import React, { useContext, useMemo, useState } from 'react';
-import { AppContext } from '../../contexts/AppContext.ts';
-import { toJalali } from '../../utils/dateUtils.ts';
-import { ClockIcon } from '../shared/Icons.tsx';
+import { AppContext } from '../../contexts/AppContext.js';
+import { toJalali } from '../../utils/dateUtils.js';
+import { ClockIcon } from '../shared/Icons.jsx';
 
-const ActivityView: React.FC = () => {
+const ActivityView = () => {
     const context = useContext(AppContext);
     if (!context) throw new Error("AppContext not found");
     const { activityLogs, users } = context;
@@ -20,7 +21,7 @@ const ActivityView: React.FC = () => {
         );
     }, [activityLogs, searchTerm]);
     
-    const formatTimestamp = (iso: string) => {
+    const formatTimestamp = (iso) => {
         const date = new Date(iso);
         return `${toJalali(iso)} - ${date.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}`;
     };

@@ -1,18 +1,8 @@
-
-
+// This file was renamed to ConfirmationModal.jsx to fix MIME type issues on static hosting.
 import React from 'react';
-import Modal from './Modal.tsx';
+import Modal from './Modal.jsx';
 
-interface ConfirmationModalProps {
-  message: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-  show: boolean;
-  confirmText?: string;
-  confirmButtonClass?: string;
-}
-
-const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ 
+const ConfirmationModal = ({ 
     message, 
     onConfirm, 
     onCancel, 

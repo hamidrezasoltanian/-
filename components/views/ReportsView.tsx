@@ -1,16 +1,16 @@
+// This file was renamed to ReportsView.jsx to fix MIME type issues on static hosting.
 import React, { useContext, useMemo, useState } from 'react';
-import { AppContext } from '../../contexts/AppContext.ts';
-import { formatNumber } from '../../utils/formatters.ts';
-import { toJalali, fromJalali } from '../../utils/dateUtils.ts';
-import { formatDuration } from '../../utils/timeUtils.ts';
-import KamaDatePicker from '../shared/KamaDatePicker.tsx';
-import { OrderProductItem } from '../../types.ts';
-import { analyzeReportData } from '../../services/geminiService.ts';
-import Modal from '../shared/Modal.tsx';
-import { AiSparkleIcon } from '../shared/Icons.tsx';
+import { AppContext } from '../../contexts/AppContext.js';
+import { formatNumber } from '../../utils/formatters.js';
+import { toJalali, fromJalali } from '../../utils/dateUtils.js';
+import { formatDuration } from '../../utils/timeUtils.js';
+import KamaDatePicker from '../shared/KamaDatePicker.jsx';
+import { analyzeReportData } from '../../services/geminiService.js';
+import Modal from '../shared/Modal.jsx';
+import { AiSparkleIcon } from '../shared/Icons.jsx';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const StatCard: React.FC<{ title: string, value: string | number, colorClass: string, icon: React.ReactNode }> = ({ title, value, colorClass, icon }) => (
+const StatCard = ({ title, value, colorClass, icon }) => (
     <div className={`p-6 rounded-xl shadow-lg ${colorClass} text-white flex items-center gap-6`}>
         <div className="text-4xl opacity-80">{icon}</div>
         <div>
@@ -20,17 +20,17 @@ const StatCard: React.FC<{ title: string, value: string | number, colorClass: st
     </div>
 );
 
-const ReportsView: React.FC = () => {
+const ReportsView = () => {
     const context = useContext(AppContext);
     if (!context) throw new Error("AppContext not found");
     const { orders, products, workflows } = context;
 
-    const [dateRange, setDateRange] = useState<{ start: string | null, end: string | null }>({ start: null, end: null });
+    const [dateRange, setDateRange] = useState({ start: null, end: null });
     const [aiAnalysis, setAiAnalysis] = useState({ loading: false, result: '', show: false });
-    const [selectedWorkflowId, setSelectedWorkflowId] = useState<string>('all');
+    const [selectedWorkflowId, setSelectedWorkflowId] = useState('all');
     const [showStepDurationTable, setShowStepDurationTable] = useState(false);
 
-    const handleDateChange = (name: 'start' | 'end', isoDate: string) => {
+    const handleDateChange = (name, isoDate) => {
         setDateRange(prev => ({ ...prev, [name]: isoDate }));
     };
 
@@ -50,11 +50,11 @@ const ReportsView: React.FC = () => {
         });
 
         let totalImports = 0;
-        const importsOverTimeMap = new Map<string, number>();
-        const productSalesMap = new Map<string, { quantity: number; name: string, totalWeight: number }>();
-        const customerNames = new Set<string>();
-        const manufacturerImports = new Map<string, number>();
-        const stepDurationsMap = new Map<string, number[]>();
+        const importsOverTimeMap = new Map();
+        const productSalesMap = new Map();
+        const customerNames = new Set();
+        const manufacturerImports = new Map();
+        const stepDurationsMap = new Map();
 
         filteredOrders.forEach(order => {
             const workflow = workflows.find(wf => wf.id === order.workflowId);
@@ -71,10 +71,11 @@ const ReportsView: React.FC = () => {
             
             // Product, Sales, Weight, and Manufacturer Calculation
             let orderTotal = 0;
-            Object.values(order.steps_data).forEach(step => {
+            // @FIX: Cast step to 'any' to allow access to 'data' property without a type error.
+            Object.values(order.steps_data).forEach((step: any) => {
                 for (const field of Object.values(step.data)) {
                     if (Array.isArray(field) && field[0]?.productId) {
-                        (field as OrderProductItem[]).forEach(item => {
+                        (field).forEach(item => {
                             const product = products.find(p => p.id === item.productId);
                             if (product) {
                                 const price = Number(product.currencyPrice) || 0;
@@ -155,7 +156,7 @@ const ReportsView: React.FC = () => {
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF', '#FF4560'];
     
     const RADIAN = Math.PI / 180;
-    const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+    const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
         if (percent === 0) return null;
         const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
         const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -168,6 +169,7 @@ const ReportsView: React.FC = () => {
         );
     };
     
+    // @FIX: Added 'any' type to props to handle props passed by recharts library.
     const ChartTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
             return (
@@ -181,7 +183,7 @@ const ReportsView: React.FC = () => {
     };
 
     const avgOverallDuration = reportData.stepDurations.reduce((acc, curr) => acc + curr.avgMs, 0) / (reportData.stepDurations.length || 1);
-    const durationColors = (durationMs: number) => {
+    const durationColors = (durationMs) => {
         if (durationMs > avgOverallDuration * 1.5) return '#FF8042'; // Bottleneck - Orange/Red
         if (durationMs > avgOverallDuration * 0.8) return '#FFBB28'; // Average - Yellow
         return '#0088FE'; // Fast - Blue
@@ -211,11 +213,13 @@ const ReportsView: React.FC = () => {
                 </div>
                  <div className="flex items-center gap-2">
                     <label className="text-sm font-medium text-gray-600">از:</label>
-                    <div className="w-40"><KamaDatePicker name="start_date_report" value={dateRange.start || ''} onChange={(e) => handleDateChange('start', e.target.value)} /></div>
+                    {/* @FIX: Added the required 'error' prop to KamaDatePicker. */}
+                    <div className="w-40"><KamaDatePicker name="start_date_report" value={dateRange.start || ''} onChange={(e) => handleDateChange('start', e.target.value)} error={false} /></div>
                 </div>
                 <div className="flex items-center gap-2">
                      <label className="text-sm font-medium text-gray-600">تا:</label>
-                    <div className="w-40"><KamaDatePicker name="end_date_report" value={dateRange.end || ''} onChange={(e) => handleDateChange('end', e.target.value)} /></div>
+                    {/* @FIX: Added the required 'error' prop to KamaDatePicker. */}
+                    <div className="w-40"><KamaDatePicker name="end_date_report" value={dateRange.end || ''} onChange={(e) => handleDateChange('end', e.target.value)} error={false} /></div>
                 </div>
                 <button onClick={() => setDateRange({start: null, end: null})} className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-300 transition-colors">پاک کردن</button>
             </div>
@@ -258,7 +262,7 @@ const ReportsView: React.FC = () => {
                                 >
                                     {reportData.importsByManufacturer.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                                 </Pie>
-                                <Tooltip formatter={(value: number) => [formatNumber(value), 'واردات']} />
+                                <Tooltip formatter={(value) => [formatNumber(value), 'واردات']} />
                                 <Legend wrapperStyle={{fontSize: "12px"}} />
                             </PieChart>
                         </ResponsiveContainer>
@@ -276,7 +280,7 @@ const ReportsView: React.FC = () => {
                                     tick={{ fontSize: 12 }} 
                                     tickFormatter={(value) => value.length > 20 ? `${value.substring(0, 18)}...` : value}
                                 />
-                                <Tooltip formatter={(value: number) => [formatNumber(value), 'Kg']} cursor={{fill: 'rgba(239, 246, 255, 0.7)'}} />
+                                <Tooltip formatter={(value) => [formatNumber(value), 'Kg']} cursor={{fill: 'rgba(239, 246, 255, 0.7)'}} />
                                 <Bar dataKey="totalWeight" fill="#82ca9d" barSize={30} name="وزن کل" />
                             </BarChart>
                         </ResponsiveContainer>
@@ -323,7 +327,8 @@ const ReportsView: React.FC = () => {
                                 <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                                 <XAxis type="number" tickFormatter={(value) => `${value} ساعت`} />
                                 <YAxis type="category" dataKey="name" width={150} tick={{ fontSize: 12 }} interval={0} />
-                                <Tooltip formatter={(value: number) => [value.toFixed(2), 'ساعت']} cursor={{ fill: 'rgba(239, 246, 255, 0.7)' }} />
+                                {/* @FIX: Convert value to number before calling toFixed to prevent type errors. */}
+                                <Tooltip formatter={(value) => [Number(value).toFixed(2), 'ساعت']} cursor={{ fill: 'rgba(239, 246, 255, 0.7)' }} />
                                 <Bar dataKey="ساعت" name="میانگین زمان" barSize={30}>
                                     {reportData.stepDurations.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={durationColors(entry.avgMs)} />

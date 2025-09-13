@@ -1,11 +1,11 @@
-import { Workflow, Order, Product, Proforma, User, Step, Field, OrderProductItem, ProformaItem, OrderStepData } from '../types.ts';
-import { generateId } from './idUtils.ts';
+// This file was renamed to migrationUtils.js to fix MIME type issues on static hosting.
+import { generateId } from './idUtils.js';
 
 // Helper to ensure an array exists and is an array
-const ensureArray = (arr: any) => Array.isArray(arr) ? arr : [];
+const ensureArray = (arr) => Array.isArray(arr) ? arr : [];
 
 // Migrate a single Field
-const migrateField = (field: any): Field => ({
+const migrateField = (field) => ({
     id: field.id || generateId('field'),
     name: field.name || `field_${Date.now()}`,
     label: field.label || 'فیلد جدید',
@@ -16,33 +16,33 @@ const migrateField = (field: any): Field => ({
 });
 
 // Migrate a single Step
-const migrateStep = (step: any): Step => ({
+const migrateStep = (step) => ({
     id: step.id || generateId('step'),
     title: step.title || 'مرحله جدید',
     fields: ensureArray(step.fields).map(migrateField),
 });
 
 // Migrate a single Workflow
-export const migrateWorkflow = (workflow: any): Workflow => ({
+export const migrateWorkflow = (workflow) => ({
     id: workflow.id || generateId('wf'),
     name: workflow.name || 'فرآیند بازیابی شده',
     steps: ensureArray(workflow.steps).map(migrateStep),
 });
 
 // Migrate OrderProductItem
-const migrateOrderProductItem = (item: any): OrderProductItem => ({
+const migrateOrderProductItem = (item) => ({
     productId: item.productId || '',
     quantity: typeof item.quantity === 'number' ? item.quantity : 1,
 });
 
 // Migrate a single Order
-export const migrateOrder = (order: any): Order => {
-    const migratedStepsData: Order['steps_data'] = {};
+export const migrateOrder = (order) => {
+    const migratedStepsData = {};
     if (order.steps_data && typeof order.steps_data === 'object') {
         Object.keys(order.steps_data).forEach(stepId => {
             const stepData = order.steps_data[stepId];
             if (stepData && typeof stepData.data === 'object') {
-                const migratedData: OrderStepData = {};
+                const migratedData = {};
                 Object.keys(stepData.data).forEach(fieldId => {
                     const value = stepData.data[fieldId];
                     // Heuristic to detect and migrate a product list
@@ -70,7 +70,7 @@ export const migrateOrder = (order: any): Order => {
 };
 
 // Migrate a single Product
-export const migrateProduct = (product: any): Product => ({
+export const migrateProduct = (product) => ({
     id: product.id || generateId('prod'),
     name: product.name || 'کالای بازیابی شده',
     code: product.code || 'N/A',
@@ -84,7 +84,7 @@ export const migrateProduct = (product: any): Product => ({
 });
 
 // Migrate ProformaItem
-const migrateProformaItem = (item: any): ProformaItem => ({
+const migrateProformaItem = (item) => ({
     productId: item.productId || '',
     name: item.name || '',
     code: item.code || '',
@@ -97,7 +97,7 @@ const migrateProformaItem = (item: any): ProformaItem => ({
 });
 
 // Migrate a single Proforma
-export const migrateProforma = (proforma: any): Proforma => ({
+export const migrateProforma = (proforma) => ({
     id: proforma.id || generateId('prof'),
     companyName: proforma.companyName || 'شرکت بازیابی شده',
     date: proforma.date || new Date().toISOString(),
@@ -106,7 +106,7 @@ export const migrateProforma = (proforma: any): Proforma => ({
 });
 
 // Migrate a single User
-export const migrateUser = (user: any): User => ({
+export const migrateUser = (user) => ({
     id: user.id || generateId('user'),
     username: user.username || 'user_restored',
     password: user.password, // Keep password if it exists
