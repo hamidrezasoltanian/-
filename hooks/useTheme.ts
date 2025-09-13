@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useLocalStorage } from './useLocalStorage.ts';
 
-export type Theme = 'blue' | 'green' | 'indigo';
+export type Theme = 'blue' | 'green' | 'indigo' | 'red' | 'dark';
 
 export const useTheme = () => {
     const [theme, setTheme] = useLocalStorage<Theme>('app_theme_v1', 'blue');
@@ -10,7 +10,7 @@ export const useTheme = () => {
     useEffect(() => {
         const root = document.documentElement;
         // Remove old theme classes
-        root.classList.remove('theme-blue', 'theme-green', 'theme-indigo');
+        root.classList.remove('theme-blue', 'theme-green', 'theme-indigo', 'theme-red', 'theme-dark');
         // Add new one
         if (theme !== 'blue') { // blue is the default, no class needed
             root.classList.add(`theme-${theme}`);

@@ -2,6 +2,7 @@ import React, { useContext, useMemo, useState } from 'react';
 import { AppContext } from '../../contexts/AppContext.ts';
 import { formatNumber } from '../../utils/formatters.ts';
 import { toJalali, fromJalali } from '../../utils/dateUtils.ts';
+import { formatDuration } from '../../utils/timeUtils.ts';
 import KamaDatePicker from '../shared/KamaDatePicker.tsx';
 import { OrderProductItem } from '../../types.ts';
 import { analyzeReportData } from '../../services/geminiService.ts';
@@ -26,6 +27,8 @@ const ReportsView: React.FC = () => {
 
     const [dateRange, setDateRange] = useState<{ start: string | null, end: string | null }>({ start: null, end: null });
     const [aiAnalysis, setAiAnalysis] = useState({ loading: false, result: '', show: false });
+    const [selectedWorkflowId, setSelectedWorkflowId] = useState<string>('all');
+    const [showStepDurationTable, setShowStepDurationTable] = useState(false);
 
     const handleDateChange = (name: 'start' | 'end', isoDate: string) => {
         setDateRange(prev => ({ ...prev, [name]: isoDate }));
@@ -33,6 +36,9 @@ const ReportsView: React.FC = () => {
 
     const reportData = useMemo(() => {
         const filteredOrders = orders.filter(order => {
+            if (selectedWorkflowId !== 'all' && order.workflowId !== selectedWorkflowId) {
+                return false;
+            }
             const orderDate = new Date(order.created_at);
             const start = dateRange.start ? new Date(dateRange.start) : null;
             const end = dateRange.end ? new Date(dateRange.end) : null;
@@ -48,7 +54,7 @@ const ReportsView: React.FC = () => {
         const productSalesMap = new Map<string, { quantity: number; name: string, totalWeight: number }>();
         const customerNames = new Set<string>();
         const manufacturerImports = new Map<string, number>();
-        const stepDurationsMap = new Map<string, { totalDuration: number; count: number }>();
+        const stepDurationsMap = new Map<string, number[]>();
 
         filteredOrders.forEach(order => {
             const workflow = workflows.find(wf => wf.id === order.workflowId);
@@ -103,8 +109,8 @@ const ReportsView: React.FC = () => {
                 if(t1 && t2) {
                     const duration = new Date(t2).getTime() - new Date(t1).getTime();
                     const key = `${step1.title} → ${step2.title}`;
-                    const existing = stepDurationsMap.get(key) || { totalDuration: 0, count: 0 };
-                    stepDurationsMap.set(key, { totalDuration: existing.totalDuration + duration, count: existing.count + 1 });
+                    const existing = stepDurationsMap.get(key) || [];
+                    stepDurationsMap.set(key, [...existing, duration]);
                 }
             }
         });
@@ -123,10 +129,22 @@ const ReportsView: React.FC = () => {
             importsByManufacturer.push({ name: 'سایر', value: otherValue });
         }
 
-        const stepDurations = Array.from(stepDurationsMap.entries()).map(([name, {totalDuration, count}]) => ({ name, "ساعت": parseFloat((totalDuration / count / (1000 * 60 * 60)).toFixed(2))}));
+        const stepDurations = Array.from(stepDurationsMap.entries()).map(([name, durations]) => {
+            const count = durations.length;
+            const totalDuration = durations.reduce((a, b) => a + b, 0);
+            const avgDuration = totalDuration / count;
+            return {
+                name,
+                "ساعت": parseFloat((avgDuration / (1000 * 60 * 60)).toFixed(2)),
+                avgMs: avgDuration,
+                minMs: Math.min(...durations),
+                maxMs: Math.max(...durations),
+                count,
+            };
+        });
 
         return { totalOrders: filteredOrders.length, totalImports, uniqueCustomers: customerNames.size, importsOverTime, topProductsByWeight, importsByManufacturer, stepDurations };
-    }, [orders, products, workflows, dateRange]);
+    }, [orders, products, workflows, dateRange, selectedWorkflowId]);
     
     const handleAiAnalysis = async () => {
         setAiAnalysis({ loading: true, result: '', show: true });
@@ -162,10 +180,17 @@ const ReportsView: React.FC = () => {
         return null;
     };
 
+    const avgOverallDuration = reportData.stepDurations.reduce((acc, curr) => acc + curr.avgMs, 0) / (reportData.stepDurations.length || 1);
+    const durationColors = (durationMs: number) => {
+        if (durationMs > avgOverallDuration * 1.5) return '#FF8042'; // Bottleneck - Orange/Red
+        if (durationMs > avgOverallDuration * 0.8) return '#FFBB28'; // Average - Yellow
+        return '#0088FE'; // Fast - Blue
+    };
+
     return (
         <div className="p-4 md:p-8 h-full overflow-y-auto">
             <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-                 <h2 className="text-2xl md:text-3xl font-bold text-gray-800">گزارشات هوشمند</h2>
+                 <div></div>
                  <button onClick={handleAiAnalysis} disabled={aiAnalysis.loading} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-5 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center gap-2 disabled:opacity-50">
                     <AiSparkleIcon className="h-5 w-5" />
                     {aiAnalysis.loading ? "در حال تحلیل..." : "تحلیل با هوش مصنوعی"}
@@ -173,6 +198,17 @@ const ReportsView: React.FC = () => {
             </div>
             
             <div className="flex flex-wrap items-center gap-4 p-4 bg-white rounded-xl shadow-md mb-8">
+                 <div className="flex items-center gap-2">
+                    <label className="text-sm font-medium text-gray-600">فرآیند:</label>
+                    <select
+                        value={selectedWorkflowId}
+                        onChange={(e) => setSelectedWorkflowId(e.target.value)}
+                        className="p-2 border border-gray-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-blue-500 min-w-[180px]"
+                    >
+                        <option value="all">همه فرآیندها</option>
+                        {workflows.map(wf => <option key={wf.id} value={wf.id}>{wf.name}</option>)}
+                    </select>
+                </div>
                  <div className="flex items-center gap-2">
                     <label className="text-sm font-medium text-gray-600">از:</label>
                     <div className="w-40"><KamaDatePicker name="start_date_report" value={dateRange.start || ''} onChange={(e) => handleDateChange('start', e.target.value)} /></div>
@@ -196,7 +232,6 @@ const ReportsView: React.FC = () => {
                     <ResponsiveContainer width="100%" height={300}>
                         <LineChart data={reportData.importsOverTime} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                            {/* FIX: Removed interval="auto" as it is not a valid value for the interval prop on XAxis. Recharts will calculate the interval automatically. */}
                             <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                             <YAxis tickFormatter={(value) => formatNumber(value)} tick={{ fontSize: 11 }} />
                             <Tooltip content={<ChartTooltip />} />
@@ -249,17 +284,54 @@ const ReportsView: React.FC = () => {
                 </div>
                 
                 <div className="bg-white p-6 rounded-xl shadow-lg">
-                    <h3 className="text-xl font-semibold mb-4 text-gray-800">میانگین زمان بین مراحل فرآیند (ساعت)</h3>
-                    <ResponsiveContainer width="100%" height={400}>
-                        <BarChart data={reportData.stepDurations} margin={{ top: 5, right: 20, left: -10, bottom: 150 }}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                            {/* FIX: Removed interval="auto" as it is not a valid value for the interval prop on XAxis. Recharts will calculate the interval automatically. */}
-                            <XAxis dataKey="name" angle={-45} textAnchor="end" tick={{ fontSize: 11 }} height={100} />
-                            <YAxis />
-                            <Tooltip formatter={(value: number) => [value, 'ساعت']} cursor={{fill: 'rgba(239, 246, 255, 0.7)'}} />
-                            <Bar dataKey="ساعت" fill="#ffc658" barSize={50} radius={[4, 4, 0, 0]} />
-                        </BarChart>
-                    </ResponsiveContainer>
+                    <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
+                        <h3 className="text-xl font-semibold text-gray-800">تحلیل زمانی فرآیند</h3>
+                        <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
+                            <button onClick={() => setShowStepDurationTable(false)} className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${!showStepDurationTable ? 'bg-white shadow text-blue-600' : 'text-gray-600 hover:bg-gray-200'}`}>نمودار</button>
+                            <button onClick={() => setShowStepDurationTable(true)} className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${showStepDurationTable ? 'bg-white shadow text-blue-600' : 'text-gray-600 hover:bg-gray-200'}`}>جدول</button>
+                        </div>
+                    </div>
+
+                    {reportData.stepDurations.length === 0 ? (
+                        <p className="text-center py-10 text-gray-500">داده‌ای برای نمایش تحلیل زمانی وجود ندارد.</p>
+                    ) : showStepDurationTable ? (
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        {['مرحله گذار', 'میانگین زمان', 'حداقل زمان', 'حداکثر زمان', 'تعداد سفارشات'].map(h =>
+                                            <th key={h} className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{h}</th>
+                                        )}
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {reportData.stepDurations.map(item => (
+                                        <tr key={item.name}>
+                                            <td className="px-4 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">{item.name}</td>
+                                            <td className="px-4 py-4 text-sm text-gray-700 font-semibold">{formatDuration(item.avgMs)}</td>
+                                            <td className="px-4 py-4 text-sm text-gray-500">{formatDuration(item.minMs)}</td>
+                                            <td className="px-4 py-4 text-sm text-gray-500">{formatDuration(item.maxMs)}</td>
+                                            <td className="px-4 py-4 text-sm text-gray-500">{item.count}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <ResponsiveContainer width="100%" height={400}>
+                            <BarChart data={reportData.stepDurations} layout="vertical" margin={{ top: 5, right: 30, left: 150, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                                <XAxis type="number" tickFormatter={(value) => `${value} ساعت`} />
+                                <YAxis type="category" dataKey="name" width={150} tick={{ fontSize: 12 }} interval={0} />
+                                <Tooltip formatter={(value: number) => [value.toFixed(2), 'ساعت']} cursor={{ fill: 'rgba(239, 246, 255, 0.7)' }} />
+                                <Bar dataKey="ساعت" name="میانگین زمان" barSize={30}>
+                                    {reportData.stepDurations.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={durationColors(entry.avgMs)} />
+                                    ))}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    )}
                 </div>
             </div>
             

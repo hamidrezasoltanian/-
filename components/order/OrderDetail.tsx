@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { AppContext } from '../../contexts/AppContext.ts';
 import { Order } from '../../types.ts';
+import { calculateOrderProgress } from '../../utils/orderUtils.ts';
 import StepForm from './StepForm.tsx';
 import ConfirmationModal from '../shared/ConfirmationModal.tsx';
 import Modal from '../shared/Modal.tsx';
@@ -26,6 +27,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onUpdate, onDelete, re
 
     const workflow = workflows.find(wf => wf.id === order.workflowId);
     const isFinalized = !!order.is_finalized;
+    const progress = calculateOrderProgress(order, workflow);
 
     useEffect(() => {
         setOrderTitle(order.title);
@@ -81,7 +83,18 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onUpdate, onDelete, re
                         disabled={readOnly || isFinalized}
                         className="text-2xl font-bold flex-grow p-2 rounded-md bg-transparent hover:bg-gray-100 focus:bg-white focus:ring-2 focus:ring-blue-400 transition-all w-full disabled:bg-transparent disabled:cursor-not-allowed"
                     />
-                     {isFinalized && <p className="text-sm text-green-600 font-semibold mt-1">این سفارش نهایی شده و قابل ویرایش نیست.</p>}
+                    <div className="mt-3 pr-2 space-y-2">
+                        <div>
+                            <div className="flex justify-between items-center mb-1">
+                                <span className="text-sm font-semibold text-gray-600">میزان پیشرفت</span>
+                                <span className="text-sm font-semibold text-blue-600">{progress}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                <div className="bg-blue-600 h-2.5 rounded-full transition-all duration-500" style={{ width: `${progress}%` }}></div>
+                            </div>
+                        </div>
+                        {isFinalized && <p className="text-sm text-green-600 font-semibold">این سفارش نهایی شده و قابل ویرایش نیست.</p>}
+                    </div>
                 </div>
                
                 <div className="flex items-center gap-2 flex-wrap">

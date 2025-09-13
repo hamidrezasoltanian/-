@@ -14,6 +14,15 @@
     }
   </script>
 
+  <script>
+    tailwind.config = {
+      theme: {
+        fontFamily: {
+          sans: ['Vazirmatn', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        }
+      }
+    }
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   
   <!-- Persian Date & Date Picker Libraries -->
@@ -39,7 +48,7 @@
 }
 </script>
 </head>
-<body>
+<body class="font-sans">
   <div id="root"></div>
   <script type="module" src="./index.tsx"></script>
 </body>

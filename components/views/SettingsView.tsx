@@ -175,15 +175,13 @@ const SettingsView: React.FC = () => {
     const [activeTab, setActiveTab] = useState('workflows');
     
     return (
-         <div className="p-4 md:p-8 max-w-5xl mx-auto h-full overflow-y-auto">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800">تنظیمات</h2>
-
+         <div className="p-4 md:p-8 max-w-5xl mx-auto h-full">
             <div className="border-b border-gray-200 mb-6">
-                <nav className="flex gap-x-6">
-                    <button onClick={() => setActiveTab('workflows')} className={`py-2 px-3 text-lg border-b-2 font-medium transition-colors ${activeTab === 'workflows' ? 'tab-active' : 'border-transparent text-gray-500 hover:text-gray-800'}`}>فرآیندها</button>
-                    <button onClick={() => setActiveTab('users')} className={`py-2 px-3 text-lg border-b-2 font-medium transition-colors ${activeTab === 'users' ? 'tab-active' : 'border-transparent text-gray-500 hover:text-gray-800'}`}>کاربران</button>
-                    <button onClick={() => setActiveTab('appearance')} className={`py-2 px-3 text-lg border-b-2 font-medium transition-colors ${activeTab === 'appearance' ? 'tab-active' : 'border-transparent text-gray-500 hover:text-gray-800'}`}>ظاهر</button>
-                    <button onClick={() => setActiveTab('backup')} className={`py-2 px-3 text-lg border-b-2 font-medium transition-colors ${activeTab === 'backup' ? 'tab-active' : 'border-transparent text-gray-500 hover:text-gray-800'}`}>پشتیبان‌گیری</button>
+                <nav className="-mb-px flex gap-x-6">
+                    <button onClick={() => setActiveTab('workflows')} className={`py-3 px-1 text-lg border-b-2 font-medium transition-colors ${activeTab === 'workflows' ? 'text-blue-600 border-blue-600' : 'border-transparent text-gray-500 hover:text-gray-800'}`}>فرآیندها</button>
+                    <button onClick={() => setActiveTab('users')} className={`py-3 px-1 text-lg border-b-2 font-medium transition-colors ${activeTab === 'users' ? 'text-blue-600 border-blue-600' : 'border-transparent text-gray-500 hover:text-gray-800'}`}>کاربران</button>
+                    <button onClick={() => setActiveTab('appearance')} className={`py-3 px-1 text-lg border-b-2 font-medium transition-colors ${activeTab === 'appearance' ? 'text-blue-600 border-blue-600' : 'border-transparent text-gray-500 hover:text-gray-800'}`}>ظاهر</button>
+                    <button onClick={() => setActiveTab('backup')} className={`py-3 px-1 text-lg border-b-2 font-medium transition-colors ${activeTab === 'backup' ? 'text-blue-600 border-blue-600' : 'border-transparent text-gray-500 hover:text-gray-800'}`}>پشتیبان‌گیری</button>
                 </nav>
             </div>
 

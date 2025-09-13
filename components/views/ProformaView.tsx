@@ -1,3 +1,4 @@
+
 import React, { useState, useContext, useMemo, useEffect, useRef } from 'react';
 import { AppContext } from '../../contexts/AppContext.ts';
 import { Proforma, ProformaItem, Product } from '../../types.ts';
@@ -5,6 +6,7 @@ import { generateId } from '../../utils/idUtils.ts';
 import { formatNumber } from '../../utils/formatters.ts';
 import { toJalali } from '../../utils/dateUtils.ts';
 import ConfirmationModal from '../shared/ConfirmationModal.tsx';
+import { useDebounce } from '../../hooks/useDebounce.ts';
 
 // ProformaEditor component (form for create/edit)
 interface ProformaEditorProps {
@@ -229,6 +231,7 @@ const ProformaView: React.FC = () => {
     const [selectedProforma, setSelectedProforma] = useState<Proforma | null>(null);
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
     const handleCreateNew = () => {
         setSelectedProforma(null);
@@ -302,12 +305,12 @@ const ProformaView: React.FC = () => {
     , [proformas]);
 
     const filteredProformas = useMemo(() => {
-        if (!searchTerm) return sortedProformas;
-        const lowercasedFilter = searchTerm.toLowerCase();
+        if (!debouncedSearchTerm) return sortedProformas;
+        const lowercasedFilter = debouncedSearchTerm.toLowerCase();
         return sortedProformas.filter(p =>
             p.companyName.toLowerCase().includes(lowercasedFilter)
         );
-    }, [sortedProformas, searchTerm]);
+    }, [sortedProformas, debouncedSearchTerm]);
 
     if (viewMode === 'create') {
         return <ProformaEditor initialProforma={selectedProforma} onSave={handleSave} onCancel={() => { setViewMode('list'); setSelectedProforma(null); }} />;
@@ -316,7 +319,7 @@ const ProformaView: React.FC = () => {
     return (
         <div className="p-4 md:p-8 max-w-7xl mx-auto h-full flex flex-col">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-800">لیست پیش‌فاکتورها</h2>
+                <div></div>
                 <button onClick={handleCreateNew} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg shadow-md hover:shadow-lg transition-all">+ ایجاد پیش‌فاکتور</button>
             </div>
             <input 

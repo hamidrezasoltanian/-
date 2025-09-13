@@ -6,6 +6,8 @@ const THEMES: { id: Theme; name: string; color: string }[] = [
     { id: 'blue', name: 'آبی (پیش‌فرض)', color: '#3b82f6' },
     { id: 'green', name: 'سبز', color: '#16a34a' },
     { id: 'indigo', name: 'نیلی', color: '#6366f1' },
+    { id: 'red', name: 'قرمز', color: '#dc2626' },
+    { id: 'dark', name: 'تاریک', color: '#1e293b' },
 ];
 
 const AppearanceSettings: React.FC = () => {
@@ -44,7 +46,7 @@ const AppearanceSettings: React.FC = () => {
                     <div key={t.id} onClick={() => setTheme(t.id)} className="cursor-pointer text-center">
                         <div
                             style={{ backgroundColor: t.color }}
-                            className={`w-16 h-16 rounded-full shadow-md transition-all ${theme === t.id ? 'ring-4 ring-offset-2 ring-blue-500' : 'hover:scale-105'}`}
+                            className={`w-16 h-16 rounded-full shadow-md transition-all ${theme === t.id ? 'ring-4 ring-offset-2 ring-blue-500' : 'hover:scale-105'} ${t.id === 'dark' ? 'border-2 border-slate-400' : ''}`}
                         ></div>
                         <p className="mt-2 text-sm font-medium text-gray-600">{t.name}</p>
                     </div>

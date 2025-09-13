@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useCallback } from 'react';
+
+import React, { useState, useMemo, useCallback, Suspense, lazy } from 'react';
 import { AppContext, AppContextType, View } from './contexts/AppContext.ts';
 import { useLocalStorage } from './hooks/useLocalStorage.ts';
 import { useNotification } from './hooks/useNotification.ts';
@@ -6,14 +7,34 @@ import { useTheme } from './hooks/useTheme.ts';
 import { Product, Order, Workflow, Proforma, User, ActivityLog } from './types.ts';
 import { DEFAULT_WORKFLOW, DEFAULT_USERS } from './constants.ts';
 import { generateId } from './utils/idUtils.ts';
-import HomeView from './components/views/HomeView.tsx';
-import WorkflowView from './components/views/WorkflowView.tsx';
-import ProductsView from './components/views/ProductsView.tsx';
-import ProformaView from './components/views/ProformaView.tsx';
-import ReportsView from './components/views/ReportsView.tsx';
-import SettingsView from './components/views/SettingsView.tsx';
+import Sidebar from './components/layout/Sidebar.tsx';
 import LoginView from './components/views/LoginView.tsx';
-import ActivityView from './components/views/ActivityView.tsx';
+import { isAiAvailable } from './services/geminiService.ts';
+import AiAssistantModal from './components/ai/AiAssistantModal.tsx';
+import { ChatBubbleSparkleIcon } from './components/shared/Icons.tsx';
+
+// Lazy load view components
+const HomeView = lazy(() => import('./components/views/HomeView.tsx'));
+const WorkflowView = lazy(() => import('./components/views/WorkflowView.tsx'));
+const ProductsView = lazy(() => import('./components/views/ProductsView.tsx'));
+const ProformaView = lazy(() => import('./components/views/ProformaView.tsx'));
+const ReportsView = lazy(() => import('./components/views/ReportsView.tsx'));
+const SettingsView = lazy(() => import('./components/views/SettingsView.tsx'));
+const ActivityView = lazy(() => import('./components/views/ActivityView.tsx'));
+
+
+const SkeletonLoader: React.FC = () => (
+    <div className="p-8">
+        <div className="skeleton-loader h-10 w-1/3 mb-8"></div>
+        <div className="grid grid-cols-3 gap-6 mb-8">
+            <div className="skeleton-loader h-24 rounded-xl"></div>
+            <div className="skeleton-loader h-24 rounded-xl"></div>
+            <div className="skeleton-loader h-24 rounded-xl"></div>
+        </div>
+        <div className="skeleton-loader h-64 rounded-xl"></div>
+    </div>
+);
+
 
 const App: React.FC = () => {
     useTheme(); // Apply theme and background on load
@@ -28,6 +49,8 @@ const App: React.FC = () => {
     const [activeView, setActiveView] = useState<View>('home');
     const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
     const { showNotification, NotificationComponent } = useNotification();
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+    const [isAiAssistantOpen, setIsAiAssistantOpen] = useState(false);
     
     const logActivity = useCallback((action: ActivityLog['action'], entityType: ActivityLog['entityType'], details: string, entityId?: string) => {
         if (!currentUser) return; // Should not happen if called correctly
@@ -115,7 +138,7 @@ const App: React.FC = () => {
         }
     };
 
-    const availableTabs = [
+    const availableTabs: { key: View; label: string }[] = [
         { key: 'home', label: 'داشبورد' },
         { key: 'workflow', label: 'گردش کار' },
         { key: 'products', label: 'کالاها' },
@@ -124,40 +147,47 @@ const App: React.FC = () => {
         { key: 'activity', label: 'فعالیت‌ها' },
         { key: 'settings', label: 'تنظیمات' }
     ];
+    
+    const currentViewLabel = availableTabs.find(tab => tab.key === activeView)?.label || 'داشبورد';
 
     return (
         <AppContext.Provider value={contextValue}>
-            <div className="h-screen flex flex-col font-sans">
+            <div className={`flex h-screen bg-slate-100 ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
                 <NotificationComponent />
-                <header className="bg-white shadow-sm p-4 border-b z-10">
-                    <div className="flex justify-between items-center max-w-screen-2xl mx-auto px-4">
-                        <div className="flex items-center gap-x-8">
-                             <h1 className="text-xl md:text-2xl font-bold text-blue-600">EZ Dashboard</h1>
-                             <nav className="hidden md:flex gap-x-6">
-                                {availableTabs.map(tab => (
-                                    <button
-                                        key={tab.key}
-                                        onClick={() => setActiveView(tab.key as View)}
-                                        className={`py-2 px-1 md:px-3 text-sm md:text-lg border-b-2 font-medium whitespace-nowrap transition-colors duration-200 ${
-                                            activeView === tab.key
-                                                ? 'tab-active'
-                                                : 'border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300'
-                                        }`}
-                                    >
-                                        {tab.label}
-                                    </button>
-                                ))}
-                            </nav>
-                        </div>
-                        <div className="flex items-center gap-x-4">
-                            <span className="text-gray-600 text-sm font-medium">کاربر: <strong className="font-bold text-gray-800">{currentUser.username}</strong></span>
-                            <button onClick={logout} className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors">خروج</button>
-                        </div>
-                    </div>
-                </header>
-                <main className="flex-grow overflow-hidden">
-                    {renderContent()}
-                </main>
+                <Sidebar
+                    activeView={activeView}
+                    setActiveView={setActiveView}
+                    logout={logout}
+                    currentUser={currentUser}
+                    isCollapsed={isSidebarCollapsed}
+                    setIsCollapsed={setIsSidebarCollapsed}
+                    tabs={availableTabs}
+                />
+                <div className="flex-1 flex flex-col overflow-hidden">
+                    <header className="bg-white/70 backdrop-blur-lg shadow-sm p-4 border-b border-slate-200 z-10">
+                        <h1 className="text-xl font-bold text-gray-800">{currentViewLabel}</h1>
+                    </header>
+                    <main className="flex-grow overflow-y-auto">
+                        <Suspense fallback={<SkeletonLoader />}>
+                            {renderContent()}
+                        </Suspense>
+                    </main>
+                </div>
+                 {isAiAvailable() && (
+                    <>
+                        <button 
+                            onClick={() => setIsAiAssistantOpen(true)}
+                            className="ai-fab"
+                            aria-label="دستیار هوشمند"
+                        >
+                           <ChatBubbleSparkleIcon className="w-8 h-8 text-white" />
+                        </button>
+                        <AiAssistantModal 
+                            isOpen={isAiAssistantOpen}
+                            onClose={() => setIsAiAssistantOpen(false)}
+                        />
+                    </>
+                )}
             </div>
         </AppContext.Provider>
     );

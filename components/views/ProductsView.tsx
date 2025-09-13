@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useContext, useRef } from 'react';
 import { AppContext, AppContextType } from '../../contexts/AppContext.ts';
 import { Product } from '../../types.ts';
@@ -7,6 +8,7 @@ import Modal from '../shared/Modal.tsx';
 import ConfirmationModal from '../shared/ConfirmationModal.tsx';
 import { isAiAvailable, generateProductDescription } from '../../services/geminiService.ts';
 import { AiSparkleIcon } from '../shared/Icons.tsx';
+import { useDebounce } from '../../hooks/useDebounce.ts';
 
 // ProductForm Component
 const ProductForm: React.FC<{ product: Partial<Product>; onSave: (product: Product) => void; onCancel: () => void; showNotification: AppContextType['showNotification'] }> = ({ product, onSave, onCancel, showNotification }) => {
@@ -89,6 +91,23 @@ const ProductForm: React.FC<{ product: Partial<Product>; onSave: (product: Produ
     );
 };
 
+// Memoized ProductRow Component for performance
+const ProductRow = React.memo(({ product, onEdit, onDelete, canEdit }: { product: Product, onEdit: (p: Product) => void, onDelete: (id: string) => void, canEdit: boolean }) => {
+    return (
+        <tr className="hover:bg-gray-50 transition-colors">
+            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.name}</td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.code}</td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.manufacturer}</td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatNumber(product.currencyPrice)} {product.currencyType}</td>
+            {canEdit && (
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button onClick={() => onEdit(product)} className="text-indigo-600 hover:text-indigo-900 ml-4 transition-colors">ویرایش</button>
+                    <button onClick={() => onDelete(product.id)} className="text-red-600 hover:text-red-900 transition-colors">حذف</button>
+                </td>
+            )}
+        </tr>
+    );
+});
 
 // Main ProductsView Component
 const ProductsView: React.FC = () => {
@@ -98,24 +117,26 @@ const ProductsView: React.FC = () => {
 
     const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const debouncedSearchTerm = useDebounce(searchTerm, 300);
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const canEdit = true;
 
     const filteredProducts = useMemo(() => {
-        if (!searchTerm) return products;
-        const lowercasedFilter = searchTerm.toLowerCase();
+        if (!debouncedSearchTerm) return products;
+        const lowercasedFilter = debouncedSearchTerm.toLowerCase();
         return products.filter(p =>
             p.name.toLowerCase().includes(lowercasedFilter) ||
             p.code.toLowerCase().includes(lowercasedFilter) ||
             (p.irc && p.irc.toLowerCase().includes(lowercasedFilter)) ||
             (p.manufacturer && p.manufacturer.toLowerCase().includes(lowercasedFilter))
         );
-    }, [products, searchTerm]);
+    }, [products, debouncedSearchTerm]);
 
     const handleAdd = () => setEditingProduct({});
     const handleEdit = (product: Product) => setEditingProduct(product);
+    const handleDeleteRequest = (id: string) => setDeleteConfirmId(id);
 
     const handleSave = (productToSave: Product) => {
         if (!canEdit) {
@@ -229,7 +250,6 @@ const ProductsView: React.FC = () => {
     return (
         <div className="p-4 md:p-8 max-w-7xl mx-auto h-full flex flex-col">
             <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-800">مدیریت کالاها</h2>
                  {canEdit && (
                     <div className="flex gap-2">
                         <button onClick={() => fileInputRef.current?.click()} className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">ورود از اکسل</button>
@@ -252,18 +272,13 @@ const ProductsView: React.FC = () => {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                         {filteredProducts.map(p => (
-                            <tr key={p.id} className="hover:bg-gray-50 transition-colors">
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{p.name}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{p.code}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{p.manufacturer}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatNumber(p.currencyPrice)} {p.currencyType}</td>
-                                {canEdit && (
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <button onClick={() => handleEdit(p)} className="text-indigo-600 hover:text-indigo-900 ml-4 transition-colors">ویرایش</button>
-                                        <button onClick={() => setDeleteConfirmId(p.id)} className="text-red-600 hover:text-red-900 transition-colors">حذف</button>
-                                    </td>
-                                )}
-                            </tr>
+                            <ProductRow
+                                key={p.id}
+                                product={p}
+                                onEdit={handleEdit}
+                                onDelete={handleDeleteRequest}
+                                canEdit={canEdit}
+                            />
                         ))}
                     </tbody>
                 </table>

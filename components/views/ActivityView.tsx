@@ -27,9 +27,6 @@ const ActivityView: React.FC = () => {
 
     return (
         <div className="p-4 md:p-8 max-w-7xl mx-auto h-full flex flex-col">
-            <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-800">گزارش فعالیت‌ها</h2>
-            </div>
             <input 
                 type="text" 
                 placeholder="جستجو در فعالیت‌ها (نام کاربر، نوع عملیات، جزئیات...)" 

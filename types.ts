@@ -103,3 +103,17 @@ export interface ActivityLog {
     entityId?: string; 
     details: string;
 }
+
+export interface ChatMessage {
+    id: string;
+    sender: 'user' | 'ai';
+    text: string;
+    isLoading?: boolean;
+    actions?: {
+        label: string;
+        action_type: 'navigation';
+        payload: {
+            view: any; // Using `any` to avoid circular dependency issues with View type
+        };
+    }[];
+}
