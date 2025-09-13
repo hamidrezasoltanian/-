@@ -1,6 +1,5 @@
-// This file was renamed to LoginView.jsx to fix MIME type issues on static hosting.
 import React, { useState, useContext } from 'react';
-import { AppContext } from '../../contexts/AppContext.js';
+import { AppContext } from '../../contexts/AppContext.ts';
 
 const LoginView = () => {
     const context = useContext(AppContext);

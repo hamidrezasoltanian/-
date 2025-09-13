@@ -1,7 +1,6 @@
-// This file was renamed to AppearanceSettings.jsx to fix MIME type issues on static hosting.
 import React, { useRef, useContext } from 'react';
-import { useTheme } from '../../hooks/useTheme.js';
-import { AppContext } from '../../contexts/AppContext.js';
+import { useTheme } from '../../hooks/useTheme.ts';
+import { AppContext } from '../../contexts/AppContext.ts';
 
 const THEMES = [
     { id: 'blue', name: 'آبی (پیش‌فرض)', color: '#3b82f6' },

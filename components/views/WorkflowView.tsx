@@ -1,11 +1,10 @@
-// This file was renamed to WorkflowView.jsx to fix MIME type issues on static hosting.
 import React, { useState, useContext, useMemo, useEffect } from 'react';
-import { AppContext } from '../../contexts/AppContext.js';
-import { generateId } from '../../utils/idUtils.js';
-import { toJalali } from '../../utils/dateUtils.js';
-import { calculateOrderProgress } from '../../utils/orderUtils.js';
-import OrderDetail from '../order/OrderDetail.jsx';
-import Modal from '../shared/Modal.jsx';
+import { AppContext } from '../../contexts/AppContext.ts';
+import { generateId } from '../../utils/idUtils.ts';
+import { toJalali } from '../../utils/dateUtils.ts';
+import { calculateOrderProgress } from '../../utils/orderUtils.ts';
+import OrderDetail from '../order/OrderDetail.tsx';
+import Modal from '../shared/Modal.tsx';
 
 // Memoized KanbanCard for performance
 // @FIX: Add inline types for props to resolve destructuring errors with TypeScript.

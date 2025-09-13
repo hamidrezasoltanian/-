@@ -1,4 +1,3 @@
-// This file was renamed to geminiService.js to fix MIME type issues on static hosting.
 import { GoogleGenAI } from "@google/genai";
 
 // The API key is expected to be populated into process.env by the execution environment.

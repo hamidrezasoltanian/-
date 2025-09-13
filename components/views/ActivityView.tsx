@@ -1,8 +1,7 @@
-// This file was renamed to ActivityView.jsx to fix MIME type issues on static hosting.
 import React, { useContext, useMemo, useState } from 'react';
-import { AppContext } from '../../contexts/AppContext.js';
-import { toJalali } from '../../utils/dateUtils.js';
-import { ClockIcon } from '../shared/Icons.jsx';
+import { AppContext } from '../../contexts/AppContext.ts';
+import { toJalali } from '../../utils/dateUtils.ts';
+import { ClockIcon } from '../shared/Icons.tsx';
 
 const ActivityView = () => {
     const context = useContext(AppContext);

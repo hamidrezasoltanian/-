@@ -1,7 +1,6 @@
-// This file was renamed to AppContext.js to fix MIME type issues on static hosting.
 import React from 'react';
 // @FIX: Import types to define the context shape.
-import { Product, Order, Workflow, Proforma, User, ActivityLog } from '../types.js';
+import { Product, Order, Workflow, Proforma, User, ActivityLog } from '../types.ts';
 
 
 // @FIX: Define and export View and AppContextType to be used in other components.

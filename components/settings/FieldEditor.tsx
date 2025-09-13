@@ -1,4 +1,3 @@
-// This file was renamed to FieldEditor.jsx to fix MIME type issues on static hosting.
 import React from 'react';
 
 const FieldEditor = ({ field, onUpdate, onDelete }) => {

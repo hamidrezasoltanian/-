@@ -1,29 +1,27 @@
-
-// This file was renamed to App.jsx to fix MIME type issues on static hosting.
 import React, { useState, useMemo, useCallback, Suspense, lazy } from 'react';
 // @FIX: Removed AppContextType and View, as they are not exported from AppContext.js and were causing errors.
-import { AppContext } from './contexts/AppContext.js';
-import { useLocalStorage } from './hooks/useLocalStorage.js';
-import { useNotification } from './hooks/useNotification.js';
-import { useTheme } from './hooks/useTheme.js';
+import { AppContext } from './contexts/AppContext.ts';
+import { useLocalStorage } from './hooks/useLocalStorage.ts';
+import { useNotification } from './hooks/useNotification.ts';
+import { useTheme } from './hooks/useTheme.ts';
 // @FIX: Removed type imports that are not used in this JSX file and were causing errors due to an empty types.js file.
 // The types are now defined in types.ts and used in other files, but not needed for annotations here.
-import { DEFAULT_WORKFLOW, DEFAULT_USERS } from './constants.js';
-import { generateId } from './utils/idUtils.js';
-import Sidebar from './components/layout/Sidebar.jsx';
-import LoginView from './components/views/LoginView.jsx';
-import { isAiAvailable } from './services/geminiService.js';
-import AiAssistantModal from './components/ai/AiAssistantModal.jsx';
-import { ChatBubbleSparkleIcon } from './components/shared/Icons.jsx';
+import { DEFAULT_WORKFLOW, DEFAULT_USERS } from './constants.ts';
+import { generateId } from './utils/idUtils.ts';
+import Sidebar from './components/layout/Sidebar.tsx';
+import LoginView from './components/views/LoginView.tsx';
+import { isAiAvailable } from './services/geminiService.ts';
+import AiAssistantModal from './components/ai/AiAssistantModal.tsx';
+import { ChatBubbleSparkleIcon } from './components/shared/Icons.tsx';
 
 // Lazy load view components
-const HomeView = lazy(() => import('./components/views/HomeView.jsx'));
-const WorkflowView = lazy(() => import('./components/views/WorkflowView.jsx'));
-const ProductsView = lazy(() => import('./components/views/ProductsView.jsx'));
-const ProformaView = lazy(() => import('./components/views/ProformaView.jsx'));
-const ReportsView = lazy(() => import('./components/views/ReportsView.jsx'));
-const SettingsView = lazy(() => import('./components/views/SettingsView.jsx'));
-const ActivityView = lazy(() => import('./components/views/ActivityView.jsx'));
+const HomeView = lazy(() => import('./components/views/HomeView.tsx'));
+const WorkflowView = lazy(() => import('./components/views/WorkflowView.tsx'));
+const ProductsView = lazy(() => import('./components/views/ProductsView.tsx'));
+const ProformaView = lazy(() => import('./components/views/ProformaView.tsx'));
+const ReportsView = lazy(() => import('./components/views/ReportsView.tsx'));
+const SettingsView = lazy(() => import('./components/views/SettingsView.tsx'));
+const ActivityView = lazy(() => import('./components/views/ActivityView.tsx'));
 
 
 const SkeletonLoader = () => (

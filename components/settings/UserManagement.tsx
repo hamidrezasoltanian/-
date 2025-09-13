@@ -1,9 +1,8 @@
-// This file was renamed to UserManagement.jsx to fix MIME type issues on static hosting.
 import React, { useState, useContext } from 'react';
-import { AppContext } from '../../contexts/AppContext.js';
-import { generateId } from '../../utils/idUtils.js';
-import Modal from '../shared/Modal.jsx';
-import ConfirmationModal from '../shared/ConfirmationModal.jsx';
+import { AppContext } from '../../contexts/AppContext.ts';
+import { generateId } from '../../utils/idUtils.ts';
+import Modal from '../shared/Modal.tsx';
+import ConfirmationModal from '../shared/ConfirmationModal.tsx';
 
 const UserForm = ({ user, onSave, onCancel }) => {
     const [localUser, setLocalUser] = useState(user);

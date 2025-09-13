@@ -1,8 +1,7 @@
-// This file was renamed to OrderSummary.jsx to fix MIME type issues on static hosting.
 import React, { useContext } from 'react';
-import { AppContext } from '../../contexts/AppContext.js';
-import { toJalali } from '../../utils/dateUtils.js';
-import { formatNumber } from '../../utils/formatters.js';
+import { AppContext } from '../../contexts/AppContext.ts';
+import { toJalali } from '../../utils/dateUtils.ts';
+import { formatNumber } from '../../utils/formatters.ts';
 
 const OrderSummary = ({ order, onClose }) => {
     const context = useContext(AppContext);

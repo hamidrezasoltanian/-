@@ -1,5 +1,4 @@
-// This file was renamed to migrationUtils.js to fix MIME type issues on static hosting.
-import { generateId } from './idUtils.js';
+import { generateId } from './idUtils.ts';
 
 // Helper to ensure an array exists and is an array
 const ensureArray = (arr) => Array.isArray(arr) ? arr : [];

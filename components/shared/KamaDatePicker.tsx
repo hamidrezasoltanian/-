@@ -1,8 +1,7 @@
-// This file was renamed to KamaDatePicker.jsx to fix MIME type issues on static hosting.
 import React, { useEffect, useMemo, useRef } from 'react';
-import { fromJalali, toJalali } from '../../utils/dateUtils.js';
-import { generateId } from '../../utils/idUtils.js';
-import { CalendarIcon } from './Icons.jsx';
+import { fromJalali, toJalali } from '../../utils/dateUtils.ts';
+import { generateId } from '../../utils/idUtils.ts';
+import { CalendarIcon } from './Icons.tsx';
 
 // @FIX: Declare kamaDatepicker as a global variable to resolve TypeScript error.
 declare const kamaDatepicker: any;

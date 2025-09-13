@@ -1,5 +1,3 @@
-// This file was renamed to orderUtils.js to fix MIME type issues on static hosting.
-
 export const calculateOrderProgress = (order, workflow) => {
     if (!workflow || !workflow.steps || workflow.steps.length === 0) {
         // If an order is finalized but the workflow is gone, show 100%

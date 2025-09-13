@@ -1,11 +1,10 @@
-// This file was renamed to OrderDetail.jsx to fix MIME type issues on static hosting.
 import React, { useState, useContext, useEffect } from 'react';
-import { AppContext } from '../../contexts/AppContext.js';
-import { calculateOrderProgress } from '../../utils/orderUtils.js';
-import StepForm from './StepForm.jsx';
-import ConfirmationModal from '../shared/ConfirmationModal.jsx';
-import Modal from '../shared/Modal.jsx';
-import OrderSummary from './OrderSummary.jsx';
+import { AppContext } from '../../contexts/AppContext.ts';
+import { calculateOrderProgress } from '../../utils/orderUtils.ts';
+import StepForm from './StepForm.tsx';
+import ConfirmationModal from '../shared/ConfirmationModal.tsx';
+import Modal from '../shared/Modal.tsx';
+import OrderSummary from './OrderSummary.tsx';
 
 const OrderDetail = ({ order, onUpdate, onDelete, readOnly = false }) => {
     const context = useContext(AppContext);

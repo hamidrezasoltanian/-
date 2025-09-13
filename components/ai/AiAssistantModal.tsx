@@ -1,9 +1,8 @@
-// This file was renamed to AiAssistantModal.jsx to fix MIME type issues on static hosting.
 import React, { useState, useContext, useRef, useEffect } from 'react';
-import { AppContext } from '../../contexts/AppContext.js';
-import { chatWithAssistant } from '../../services/geminiService.js';
-import { generateId } from '../../utils/idUtils.js';
-import { AiSparkleIcon } from '../shared/Icons.jsx';
+import { AppContext } from '../../contexts/AppContext.ts';
+import { chatWithAssistant } from '../../services/geminiService.ts';
+import { generateId } from '../../utils/idUtils.ts';
+import { AiSparkleIcon } from '../shared/Icons.tsx';
 
 const AiAssistantModal = ({ isOpen, onClose }) => {
     const context = useContext(AppContext);

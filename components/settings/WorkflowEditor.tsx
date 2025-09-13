@@ -1,8 +1,7 @@
-// This file was renamed to WorkflowEditor.jsx to fix MIME type issues on static hosting.
 import React, { useState, useContext } from 'react';
-import { AppContext } from '../../contexts/AppContext.js';
-import { generateId } from '../../utils/idUtils.js';
-import FieldEditor from './FieldEditor.jsx';
+import { AppContext } from '../../contexts/AppContext.ts';
+import { generateId } from '../../utils/idUtils.ts';
+import FieldEditor from './FieldEditor.tsx';
 
 const WorkflowEditor = ({ workflow, onBack }) => {
     const context = useContext(AppContext);

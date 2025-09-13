@@ -1,12 +1,11 @@
-// This file was renamed to SettingsView.jsx to fix MIME type issues on static hosting.
 import React, { useState, useContext, useRef } from 'react';
-import { AppContext } from '../../contexts/AppContext.js';
-import { generateId } from '../../utils/idUtils.js';
-import ConfirmationModal from '../shared/ConfirmationModal.jsx';
-import WorkflowEditor from '../settings/WorkflowEditor.jsx';
-import UserManagement from '../settings/UserManagement.jsx';
-import AppearanceSettings from '../settings/AppearanceSettings.jsx';
-import { migrateWorkflow, migrateOrder, migrateProduct, migrateProforma, migrateUser } from '../../utils/migrationUtils.js';
+import { AppContext } from '../../contexts/AppContext.ts';
+import { generateId } from '../../utils/idUtils.ts';
+import ConfirmationModal from '../shared/ConfirmationModal.tsx';
+import WorkflowEditor from '../settings/WorkflowEditor.tsx';
+import UserManagement from '../settings/UserManagement.tsx';
+import AppearanceSettings from '../settings/AppearanceSettings.tsx';
+import { migrateWorkflow, migrateOrder, migrateProduct, migrateProforma, migrateUser } from '../../utils/migrationUtils.ts';
 
 
 const BackupRestore = () => {

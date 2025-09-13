@@ -1,13 +1,12 @@
-// This file was renamed to ReportsView.jsx to fix MIME type issues on static hosting.
 import React, { useContext, useMemo, useState } from 'react';
-import { AppContext } from '../../contexts/AppContext.js';
-import { formatNumber } from '../../utils/formatters.js';
-import { toJalali, fromJalali } from '../../utils/dateUtils.js';
-import { formatDuration } from '../../utils/timeUtils.js';
-import KamaDatePicker from '../shared/KamaDatePicker.jsx';
-import { analyzeReportData } from '../../services/geminiService.js';
-import Modal from '../shared/Modal.jsx';
-import { AiSparkleIcon } from '../shared/Icons.jsx';
+import { AppContext } from '../../contexts/AppContext.ts';
+import { formatNumber } from '../../utils/formatters.ts';
+import { toJalali, fromJalali } from '../../utils/dateUtils.ts';
+import { formatDuration } from '../../utils/timeUtils.ts';
+import KamaDatePicker from '../shared/KamaDatePicker.tsx';
+import { analyzeReportData } from '../../services/geminiService.ts';
+import Modal from '../shared/Modal.tsx';
+import { AiSparkleIcon } from '../shared/Icons.tsx';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const StatCard = ({ title, value, colorClass, icon }) => (

@@ -1,4 +1,3 @@
-// This file was renamed to types.js to fix MIME type issues on static hosting.
 // @FIX: Populating types to fix import errors across the application.
 export type Product = {
     id: string;

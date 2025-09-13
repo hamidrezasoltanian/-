@@ -1,4 +1,3 @@
-// This file was renamed to useNotification.js to fix MIME type issues on static hosting.
 import React, { useState, useCallback } from 'react';
 
 export const useNotification = () => {

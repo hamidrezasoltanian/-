@@ -1,6 +1,5 @@
-// This file was renamed to ConfirmationModal.jsx to fix MIME type issues on static hosting.
 import React from 'react';
-import Modal from './Modal.jsx';
+import Modal from './Modal.tsx';
 
 const ConfirmationModal = ({ 
     message, 

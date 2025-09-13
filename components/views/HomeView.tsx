@@ -1,10 +1,9 @@
-// This file was renamed to HomeView.jsx to fix MIME type issues on static hosting.
 import React, { useContext, useMemo } from 'react';
-import { AppContext } from '../../contexts/AppContext.js';
-import { formatNumber } from '../../utils/formatters.js';
-import { toJalali } from '../../utils/dateUtils.js';
-import { calculateOrderProgress } from '../../utils/orderUtils.js';
-import { ClipboardListIcon, BoxIcon, DocumentTextIcon, PlusCircleIcon } from '../shared/Icons.jsx';
+import { AppContext } from '../../contexts/AppContext.ts';
+import { formatNumber } from '../../utils/formatters.ts';
+import { toJalali } from '../../utils/dateUtils.ts';
+import { calculateOrderProgress } from '../../utils/orderUtils.ts';
+import { ClipboardListIcon, BoxIcon, DocumentTextIcon, PlusCircleIcon } from '../shared/Icons.tsx';
 
 const StatCard = ({ title, value, icon, color, onClick }) => (
     <button onClick={onClick} className="soft-shadow bg-white p-6 flex items-center gap-4 text-right w-full transition-all hover:scale-[1.03]">

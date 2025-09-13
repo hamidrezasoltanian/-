@@ -1,7 +1,6 @@
-// This file was renamed to ProductSelectorField.jsx to fix MIME type issues on static hosting.
 import React, { useContext, useMemo } from 'react';
-import { AppContext } from '../../contexts/AppContext.js';
-import { formatNumber } from '../../utils/formatters.js';
+import { AppContext } from '../../contexts/AppContext.ts';
+import { formatNumber } from '../../utils/formatters.ts';
 
 const ProductSelectorField = ({ field, value, onChange, error, readOnly = false }) => {
     const { products } = useContext(AppContext);

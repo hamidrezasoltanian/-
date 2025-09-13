@@ -1,7 +1,6 @@
-// This file was renamed to index.js to fix MIME type issues on static hosting.
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App.jsx';
+import App from './App.tsx';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

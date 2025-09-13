@@ -1,6 +1,5 @@
-// This file was renamed to useTheme.js to fix MIME type issues on static hosting.
 import { useEffect } from 'react';
-import { useLocalStorage } from './useLocalStorage.js';
+import { useLocalStorage } from './useLocalStorage.ts';
 
 export const useTheme = () => {
     const [theme, setTheme] = useLocalStorage('app_theme_v1', 'blue');

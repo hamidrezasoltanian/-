@@ -1,4 +1,3 @@
-// This file was renamed to useLocalStorage.js to fix MIME type issues on static hosting.
 import React, { useState, useCallback } from 'react';
 
 export function useLocalStorage(key, initialValue) {

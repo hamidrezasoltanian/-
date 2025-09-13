@@ -1,11 +1,10 @@
-// This file was renamed to ProformaView.jsx to fix MIME type issues on static hosting.
 import React, { useState, useContext, useMemo, useEffect, useRef } from 'react';
-import { AppContext } from '../../contexts/AppContext.js';
-import { generateId } from '../../utils/idUtils.js';
-import { formatNumber } from '../../utils/formatters.js';
-import { toJalali } from '../../utils/dateUtils.js';
-import ConfirmationModal from '../shared/ConfirmationModal.jsx';
-import { useDebounce } from '../../hooks/useDebounce.js';
+import { AppContext } from '../../contexts/AppContext.ts';
+import { generateId } from '../../utils/idUtils.ts';
+import { formatNumber } from '../../utils/formatters.ts';
+import { toJalali } from '../../utils/dateUtils.ts';
+import ConfirmationModal from '../shared/ConfirmationModal.tsx';
+import { useDebounce } from '../../hooks/useDebounce.ts';
 
 // ProformaEditor component (form for create/edit)
 const ProformaEditor = ({ initialProforma, onSave, onCancel }) => {

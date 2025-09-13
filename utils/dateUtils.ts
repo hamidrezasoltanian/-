@@ -1,4 +1,3 @@
-// This file was renamed to dateUtils.js to fix MIME type issues on static hosting.
 // This requires persian-date to be loaded globally from index.html
 
 // @FIX: Declare persianDate as a global variable to inform TypeScript that it will be available at runtime.

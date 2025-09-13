@@ -1,4 +1,3 @@
-// This file was renamed to Sidebar.jsx to fix MIME type issues on static hosting.
 import React from 'react';
 import {
     HomeIcon,
@@ -10,7 +9,7 @@ import {
     Cog6ToothIcon,
     ArrowRightOnRectangleIcon,
     Bars3Icon
-} from '../shared/Icons.jsx';
+} from '../shared/Icons.tsx';
 
 const iconMap = {
     home: HomeIcon,

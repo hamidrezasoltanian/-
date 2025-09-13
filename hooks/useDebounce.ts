@@ -1,4 +1,3 @@
-// This file was renamed to useDebounce.js to fix MIME type issues on static hosting.
 import { useState, useEffect } from 'react';
 
 export function useDebounce(value, delay) {

@@ -1,8 +1,7 @@
-// This file was renamed to StepForm.jsx to fix MIME type issues on static hosting.
 import React, { useState, useContext, useCallback } from 'react';
-import { AppContext } from '../../contexts/AppContext.js';
-import KamaDatePicker from '../shared/KamaDatePicker.jsx';
-import ProductSelectorField from './ProductSelectorField.jsx';
+import { AppContext } from '../../contexts/AppContext.ts';
+import KamaDatePicker from '../shared/KamaDatePicker.tsx';
+import ProductSelectorField from './ProductSelectorField.tsx';
 
 const StepForm = ({ order, workflowStep, onStepDataChange, readOnly = false }) => {
     const { showNotification } = useContext(AppContext);

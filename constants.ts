@@ -1,5 +1,4 @@
-// This file was renamed to constants.js to fix MIME type issues on static hosting.
-import { generateId } from './utils/idUtils.js';
+import { generateId } from './utils/idUtils.ts';
 
 export const DEFAULT_WORKFLOW = {
     id: generateId('wf'),
