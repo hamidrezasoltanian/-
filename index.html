@@ -54,7 +54,13 @@
 </head>
 <body class="font-sans">
   <div id="root"></div>
-  <!-- Change script type to use Babel for transpilation -->
-  <script type="text/babel" data-presets="typescript,react" data-type="module" src="./index.tsx"></script>
+  <!--
+    The script tag for the React application.
+    - `type="text/babel"`: Tells Babel to transpile this script.
+    - `data-type="module"`: Crucial instruction for Babel. It ensures the output script tag is `<script type="module">`,
+      which is required for using `import` statements and the `importmap` above.
+    - `data-presets="typescript,react"`: Tells Babel to use presets for transpiling TypeScript and JSX syntax.
+  -->
+  <script type="text/babel" data-type="module" data-presets="typescript,react" src="./index.tsx"></script>
 </body>
 </html>
